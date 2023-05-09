@@ -58,7 +58,7 @@ def process_images():
 
     # Write array of image to index pairs to csv
     image_pairs_DF = pd.DataFrame(image_idx_pairs)
-    image_pairs_DF.to_csv("image_idx_pairs.csv")
+    image_pairs_DF.to_csv("image_idx_pairs.csv", index=False)
     
     # Write images and labels to csv 
     labels_DF = pd.DataFrame(labels)
