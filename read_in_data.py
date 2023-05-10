@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def process_images():
-    path = '/Users/josephjamison/Downloads/data/images/train/'
+    path = '/Users/josephjamison/Downloads/CS231n_temp/data/images/train/'
     folder_list = [i for i in os.listdir(path) if not i.startswith('.')]
 
     total_images_processed = 0
@@ -56,23 +56,32 @@ def process_images():
     assert N == image_idx_pairs.shape[0]
     print("images.shape: ", images.shape)
 
-    # Replace labels with integers 
-    label_dict = {}
+    # Assign unique integer to each label 
+    label_names = []
     counter = 0
     for i in np.unique(labels):
-        label_dict[i] = counter
+        label_names.append([i, counter])
         counter += 1
-    print(label_dict)
+    # print("Label_names: ", label_names)
+
+    # Replace labels with integers
+    for i in label_names:
+        labels[labels==i[0]] = i[1]
+    
 
     # Write array of image to index pairs to csv
     image_pairs_DF = pd.DataFrame(image_idx_pairs)
     image_pairs_DF.to_csv("image_idx_pairs.csv", index=False)
+
+    # Write dictionary of label strings to integers to csv
+    label_names_DF = pd.DataFrame(label_names)
+    label_names_DF.to_csv("label_names.csv", index=False)
     
     # Write images and labels to csv 
     labels_DF = pd.DataFrame(labels)
     labels_DF.to_pickle("small_images_labels.pkl")
     image_DF = pd.DataFrame(images.reshape(N, -1))
-    image_DF.to_pickle("small_images_all_data.pkl")
+    # image_DF.to_pickle("small_images_all_data.pkl")
 
 
 def main():
