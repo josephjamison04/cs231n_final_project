@@ -56,6 +56,14 @@ def process_images():
     assert N == image_idx_pairs.shape[0]
     print("images.shape: ", images.shape)
 
+    # Replace labels with integers 
+    label_dict = {}
+    counter = 0
+    for i in np.unique(labels):
+        label_dict[i] = counter
+        counter += 1
+    print(label_dict)
+
     # Write array of image to index pairs to csv
     image_pairs_DF = pd.DataFrame(image_idx_pairs)
     image_pairs_DF.to_csv("image_idx_pairs.csv", index=False)
