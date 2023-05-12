@@ -1,9 +1,0 @@
-name: new_env
-channels:
-  - defaults
-  - pytorch
-dependencies:
-  - python=3.10
-  - pytorch
-  - torchvision
-  - torchaudio
