@@ -15,45 +15,60 @@ from tqdm import tqdm
 import time, random, numpy as np, argparse
 from types import SimpleNamespace
 
-class FCNet(nn.Module):
-    def __init__(self, input_size, num_classes):
-        super(FCNet, self).__init__()
-        self.input_size = input_size
-        self.fc1 = nn.Linear(self.input_size, 512)
-        self.fc2 = nn.Linear(512, 256)
-        self.fc3 = nn.Linear(256, 128)
-        self.fc4 = nn.Linear(128, num_classes)
-        self.relu = nn.ReLU()
+# class FCNet(nn.Module):
+#     def __init__(self, input_size, num_classes):
+#         super(FCNet, self).__init__()
+#         self.input_size = input_size
+#         self.fc1 = nn.Linear(self.input_size, 512)
+#         self.fc2 = nn.Linear(512, 256)
+#         self.fc3 = nn.Linear(256, 128)
+#         self.fc4 = nn.Linear(128, num_classes)
+#         self.relu = nn.ReLU()
 
-    def forward(self, x):
-        x = x.view(-1, self.input_size)
-        x = self.relu(self.fc1(x))
-        x = self.relu(self.fc2(x))
-        x = self.relu(self.fc3(x))
-        x = self.fc4(x)
-        return x
+#     def forward(self, x):
+#         x = x.view(-1, self.input_size)
+#         x = self.relu(self.fc1(x))
+#         x = self.relu(self.fc2(x))
+#         x = self.relu(self.fc3(x))
+#         x = self.fc4(x)
+#         return x
 
-def load_data(train =True,valid = True,test = False):
+def load_data(args,train =True,valid = True,test = False):
     # Load the raw CIFAR-10 data.
     data_dir = '/home/ubuntu/CS231N/data/split_datasets/'
     # data_dir = "../../data/"
     X_train,y_train,X_valid,y_valid,X_test,y_test = None, None, None, None, None, None
+    
+    
     if train:
         X_train = pd.read_pickle(data_dir + "train_data.pkl").to_numpy()
         y_train = pd.read_pickle(data_dir + "train_labels.pkl").to_numpy()
         y_train = y_train.flatten().astype(np.int64)
+        if args.small_data:
+            X_train = X_train[:4000,:]
+            y_train = y_train[:4000]
+        if args.reshape:
+            print(X_train.shape)
+            X_train = X_train.reshape(-1, 3, 128, 128)
         print('Training data shape: ', X_train.shape)
         print('Training labels shape: ', y_train.shape)
     if valid:
         X_valid = pd.read_pickle(data_dir + "valid_data.pkl").to_numpy()
         y_valid = pd.read_pickle(data_dir + "valid_labels.pkl").to_numpy()
         y_valid = y_valid.flatten().astype(np.int64)
+        if args.small_data:
+            X_valid = X_valid[:4000,:]
+            y_valid = y_valid[:4000]
+        if args.reshape:
+            X_valid = X_valid.reshape(-1,3,128,128)
         print('Validation data shape: ', X_valid.shape)
         print('Validation labels shape: ', y_valid.shape)
     if test:
         X_test = pd.read_pickle(data_dir + "test_data.pkl").to_numpy()
         y_test = pd.read_pickle(data_dir + "test_labels.pkl").to_numpy()
         y_test = y_test.flatten().astype(np.int64)
+        if args.reshape:
+            X_valid = X_valid.view(-1,3,128,128)
         print('Test data shape: ', X_test.shape)
         print('Test labels shape: ', y_test.shape)
     # As a sanity check, we print out the size of the data we output.
@@ -74,11 +89,22 @@ def save_model(model, optimizer, args=None, config=None, filepath='fc_base.pt'):
     torch.save(save_info, filepath)
     print(f"save the model to {filepath}")
 
+def flatten(x):
+    N = x.shape[0] # read in N, C, H, W
+    return x.view(N, -1)  # "flatten" the C * H * W values into a single vector per image
+    
+# We need to wrap `flatten` function in a module in order to stack it
+# in nn.Sequential
+class Flatten(nn.Module):
+    def forward(self, x):
+        return flatten(x)
+
 def train(args):
     device = torch.device("cuda") if args.use_gpu else torch.device("cpu")
     # load train and valid data
-    X_train,y_train,X_valid,y_valid,_ ,_ =load_data()
+    args.reshape = True
 
+    X_train,y_train,X_valid,y_valid,_ ,_ =load_data(args)
     X_train = torch.from_numpy(X_train).to(device)
     X_valid = torch.from_numpy(X_valid).to(device)
     y_train = torch.from_numpy(y_train).to(device)
@@ -92,16 +118,58 @@ def train(args):
 
     
     epochs =args.epochs
-    input_size = 3 * 128 * 128  # image size
-    num_classes = 100  # number of classes
     learning_rate = args.lr
     dtype = torch.float32
-    # model = FCNet(input_size, num_classes)
+    ####################################################################################################
+    ####################################################################################################
+    '''model_fc'''
+    # input_size = 3 * 128 * 128  # image size
+    # num_classes = 100  # number of classes
+    # model = nn.Sequential(
+    #     nn.Linear(input_size, 256),
+    #     nn.ReLU(),
+    #     nn.Linear(256, num_classes)
+    #     )
+    ####################################################################################################
+    '''model_conv_max'''
+    input_h = 128
+    channel_1 = 16
+    channel_2 = 32
+    channel_3 = 16
+    channel_4 = 32
+    num_classes = 100
+    # First pool layer
+    kernel_size_1 = 2
+    h_out_pool_1 = (input_h - (kernel_size_1 - 1)-1) / kernel_size_1 + 1
+
+    # Second pool layer
+    kernel_size_2 = 4
+    h_out_pool_2 = (h_out_pool_1 - (kernel_size_2 - 1)-1) / kernel_size_2 + 1
+
+    channel_out = int(channel_4 * h_out_pool_2 * h_out_pool_2) # flattened output size for affine
     model = nn.Sequential(
-        nn.Linear(input_size, 256),
+        # Layer 1: Conv - batchnorm - relu - conv - batchnorm - relu - maxpool
+        nn.Conv2d(in_channels= 3, out_channels= channel_1, kernel_size= (7,7), padding=3),
+        nn.BatchNorm2d(channel_1),
         nn.ReLU(),
-        nn.Linear(256, num_classes)
-        )
+        nn.Conv2d(in_channels= channel_1, out_channels= channel_2, kernel_size= (5,5), padding=2),
+        nn.BatchNorm2d(channel_2),
+        nn.ReLU(),
+        nn.MaxPool2d(kernel_size= kernel_size_1),
+        # Layer 2: Conv - batchnorm - relu - conv - relu - maxpool
+        nn.Conv2d(in_channels= channel_2, out_channels= channel_3, kernel_size= (3,3), padding=1),
+        nn.BatchNorm2d(channel_3),
+        nn.ReLU(),
+        nn.Conv2d(in_channels= channel_3, out_channels= channel_4, kernel_size= (1,1), padding=0),
+        nn.ReLU(),
+        nn.MaxPool2d(kernel_size= kernel_size_2),
+        # Output: Affine
+        Flatten(),
+        nn.Linear(channel_out, num_classes))
+
+
+    ####################################################################################################
+    ####################################################################################################
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     model = model.to(device=device)  # move the model parameters to CPU/GPU
@@ -176,6 +244,7 @@ def get_args():
     parser.add_argument("--epochs", type=int, default=10)
 
     parser.add_argument("--use_gpu", action="store_true")
+    parser.add_argument("--small_data", action="store_true")
 
     # hyper parameters
     parser.add_argument(
