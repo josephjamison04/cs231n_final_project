@@ -30,9 +30,40 @@ class FCNet(nn.Module):
         x = self.fc4(x)
         return x
 
-def train():
-    # Instantiate the model
-    input_size = 128 * 128  # image size
+def load_data(train =True,valid = True,test = False):
+    # Load the raw CIFAR-10 data.
+    data_dir = '/home/ubuntu/CS231N/data/split_datasets/'
+    # data_dir = "../../data/"
+    X_train,y_train,X_valid,y_valid,X_test,y_test = None, None, None, None, None, None
+    if train:
+        X_train = pd.read_pickle(data_dir + "train_data.pkl").to_numpy()
+        y_train = pd.read_pickle(data_dir + "train_labels.pkl").to_numpy()
+        y_train = y_train.flatten().astype(np.int64)
+        print('Training data shape: ', X_train.shape)
+        print('Training labels shape: ', y_train.shape)
+    if valid:
+        X_valid = pd.read_pickle(data_dir + "valid_data.pkl").to_numpy()
+        y_valid = pd.read_pickle(data_dir + "valid_labels.pkl").to_numpy()
+        y_valid = y_valid.flatten().astype(np.int64)
+        print('Validation data shape: ', X_valid.shape)
+        print('Validation labels shape: ', y_valid.shape)
+    if test:
+        X_test = pd.read_pickle(data_dir + "test_data.pkl").to_numpy()
+        y_test = pd.read_pickle(data_dir + "test_labels.pkl").to_numpy()
+        y_test = y_test.flatten().astype(np.int64)
+        print('Test data shape: ', X_test.shape)
+        print('Test labels shape: ', y_test.shape)
+    # As a sanity check, we print out the size of the data we output.
+    # if didn;t load the data, it is None
+    return X_train,y_train,X_valid,y_valid,X_test,y_test
+
+def train(args):
+    device = torch.device("cuda") if args.use_gpu else torch.device("cpu")
+    # load train and valid data
+    X_train,y_train,X_valid,y_valid,_ ,_ =load_data()
+    
+
+    input_size = 3 * 128 * 128  # image size
     num_classes = 10  # number of classes
     model = FCNet(input_size, num_classes)
 
