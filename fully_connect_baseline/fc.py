@@ -75,7 +75,7 @@ def load_data(args,train =True,valid = True,test = False):
     # if didn;t load the data, it is None
     return X_train,y_train,X_valid,y_valid,X_test,y_test
 
-def save_model(model, optimizer, args=None, config=None, filepath='fc_base.pt'):
+def save_model(model, optimizer, args=None, config=None, filepath=args.filepath):
     save_info = {
         "model": model.state_dict(),
         "optim": optimizer.state_dict()
@@ -123,49 +123,51 @@ def train(args):
     ####################################################################################################
     ####################################################################################################
     '''model_fc'''
-    # input_size = 3 * 128 * 128  # image size
-    # num_classes = 100  # number of classes
-    # model = nn.Sequential(
-    #     nn.Linear(input_size, 256),
-    #     nn.ReLU(),
-    #     nn.Linear(256, num_classes)
-    #     )
+    if args.option == 'fc':
+        input_size = 3 * 128 * 128  # image size
+        num_classes = 100  # number of classes
+        model = nn.Sequential(
+            nn.Linear(input_size, 256),
+            nn.ReLU(),
+            nn.Linear(256, num_classes)
+            )
     ####################################################################################################
     '''model_conv_max'''
-    input_h = 128
-    channel_1 = 16
-    channel_2 = 32
-    channel_3 = 16
-    channel_4 = 32
-    num_classes = 100
-    # First pool layer
-    kernel_size_1 = 2
-    h_out_pool_1 = (input_h - (kernel_size_1 - 1)-1) / kernel_size_1 + 1
+    if args.option == 'conv':
+        input_h = 128
+        channel_1 = 16
+        channel_2 = 32
+        channel_3 = 16
+        channel_4 = 32
+        num_classes = 100
+        # First pool layer
+        kernel_size_1 = 2
+        h_out_pool_1 = (input_h - (kernel_size_1 - 1)-1) / kernel_size_1 + 1
 
-    # Second pool layer
-    kernel_size_2 = 4
-    h_out_pool_2 = (h_out_pool_1 - (kernel_size_2 - 1)-1) / kernel_size_2 + 1
+        # Second pool layer
+        kernel_size_2 = 4
+        h_out_pool_2 = (h_out_pool_1 - (kernel_size_2 - 1)-1) / kernel_size_2 + 1
 
-    channel_out = int(channel_4 * h_out_pool_2 * h_out_pool_2) # flattened output size for affine
-    model = nn.Sequential(
-        # Layer 1: Conv - batchnorm - relu - conv - batchnorm - relu - maxpool
-        nn.Conv2d(in_channels= 3, out_channels= channel_1, kernel_size= (7,7), padding=3),
-        nn.BatchNorm2d(channel_1),
-        nn.ReLU(),
-        nn.Conv2d(in_channels= channel_1, out_channels= channel_2, kernel_size= (5,5), padding=2),
-        nn.BatchNorm2d(channel_2),
-        nn.ReLU(),
-        nn.MaxPool2d(kernel_size= kernel_size_1),
-        # Layer 2: Conv - batchnorm - relu - conv - relu - maxpool
-        nn.Conv2d(in_channels= channel_2, out_channels= channel_3, kernel_size= (3,3), padding=1),
-        nn.BatchNorm2d(channel_3),
-        nn.ReLU(),
-        nn.Conv2d(in_channels= channel_3, out_channels= channel_4, kernel_size= (1,1), padding=0),
-        nn.ReLU(),
-        nn.MaxPool2d(kernel_size= kernel_size_2),
-        # Output: Affine
-        Flatten(),
-        nn.Linear(channel_out, num_classes))
+        channel_out = int(channel_4 * h_out_pool_2 * h_out_pool_2) # flattened output size for affine
+        model = nn.Sequential(
+            # Layer 1: Conv - batchnorm - relu - conv - batchnorm - relu - maxpool
+            nn.Conv2d(in_channels= 3, out_channels= channel_1, kernel_size= (7,7), padding=3),
+            nn.BatchNorm2d(channel_1),
+            nn.ReLU(),
+            nn.Conv2d(in_channels= channel_1, out_channels= channel_2, kernel_size= (5,5), padding=2),
+            nn.BatchNorm2d(channel_2),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size= kernel_size_1),
+            # Layer 2: Conv - batchnorm - relu - conv - relu - maxpool
+            nn.Conv2d(in_channels= channel_2, out_channels= channel_3, kernel_size= (3,3), padding=1),
+            nn.BatchNorm2d(channel_3),
+            nn.ReLU(),
+            nn.Conv2d(in_channels= channel_3, out_channels= channel_4, kernel_size= (1,1), padding=0),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size= kernel_size_2),
+            # Output: Affine
+            Flatten(),
+            nn.Linear(channel_out, num_classes))
 
 
     ####################################################################################################
@@ -199,9 +201,11 @@ def train(args):
 
         train_num_correct,train_num_samples =check_accuracy(loader_train,model)
         train_epoch_acc = float(train_num_correct) / train_num_samples
-        
+        max_val_acc = -1.0
         val_num_correct,val_num_samples =check_accuracy(loader_val,model)
-        val_epoch_acc = float(val_num_correct) / val_num_samples
+        val_epoch_acc = float(val_num_correct) / val_num_samples 
+        if val_epoch_acc > max_val_acc:
+            save_model(model,optimizer)
         print('Training ACC: Got %d / %d correct (%.2f)' % (train_num_correct, train_num_samples, 100 * train_epoch_acc))
         print('Val ACC: Got %d / %d correct (%.2f)' % (val_num_correct, val_num_samples, 100 * val_epoch_acc))
         print('-'*100)
@@ -260,12 +264,20 @@ def get_args():
         help="learning rate, default lr 1e-5",
         default=1e-5,
     )
+    parser.add_argument(
+        "--option",
+        type=str,
+        help="conv: convolutional layers; fc: linear only",
+        choices=("conv", "fc"),
+        default="fc",
+    )
 
     args = parser.parse_args()
     return args
 
 if __name__ == "__main__":
     args = get_args()
+    args.filepath = f"{args.option}-{args.epochs}-{args.lr}-cs231n.pt"  # save path
     seed_everything(args.seed)
     train(args)
     
