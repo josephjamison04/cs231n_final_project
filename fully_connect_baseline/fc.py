@@ -35,13 +35,14 @@ from types import SimpleNamespace
 
 def load_data(args,train =True,valid = True,test = False):
     # Load the raw CIFAR-10 data.
-    data_dir = '/home/ubuntu/CS231N/data/split_datasets/'
+    # data_dir = '/home/ubuntu/CS231N/data/split_datasets/'
+    data_dir = '/home/ubuntu/CS231N/data/Normalized-datasets/'
     # data_dir = "../../data/"
     X_train,y_train,X_valid,y_valid,X_test,y_test = None, None, None, None, None, None
     
     
     if train:
-        X_train = pd.read_pickle(data_dir + "train_data.pkl").to_numpy()
+        X_train = pd.read_pickle(data_dir + "X_train_norm.pkl").to_numpy()
         y_train = pd.read_pickle(data_dir + "train_labels.pkl").to_numpy()
         y_train = y_train.flatten().astype(np.int64)
         if args.small_data:
@@ -53,7 +54,7 @@ def load_data(args,train =True,valid = True,test = False):
         print('Training data shape: ', X_train.shape)
         print('Training labels shape: ', y_train.shape)
     if valid:
-        X_valid = pd.read_pickle(data_dir + "valid_data.pkl").to_numpy()
+        X_valid = pd.read_pickle(data_dir + "x_valid_norm.pkl").to_numpy()
         y_valid = pd.read_pickle(data_dir + "valid_labels.pkl").to_numpy()
         y_valid = y_valid.flatten().astype(np.int64)
         if args.small_data:
@@ -64,7 +65,7 @@ def load_data(args,train =True,valid = True,test = False):
         print('Validation data shape: ', X_valid.shape)
         print('Validation labels shape: ', y_valid.shape)
     if test:
-        X_test = pd.read_pickle(data_dir + "test_data.pkl").to_numpy()
+        X_test = pd.read_pickle(data_dir + "X_test_norm.pkl").to_numpy()
         y_test = pd.read_pickle(data_dir + "test_labels.pkl").to_numpy()
         y_test = y_test.flatten().astype(np.int64)
         if args.reshape:
@@ -75,7 +76,8 @@ def load_data(args,train =True,valid = True,test = False):
     # if didn;t load the data, it is None
     return X_train,y_train,X_valid,y_valid,X_test,y_test
 
-def save_model(model, optimizer, args=None, config=None, filepath=args.filepath):
+def save_model(model, optimizer, args=None, config=None):
+    filepath=args.filepath
     save_info = {
         "model": model.state_dict(),
         "optim": optimizer.state_dict()
