@@ -6,7 +6,7 @@
 
 ## for conv layers  
 
-    python fc.py --use_gpu --batch_size 64 --lr 1e-3 --epochs 3 --option conv
+    python fc.py --use_gpu --batch_size 64 --lr 1e-3 --epochs 3 --option conv 
 
 ## for fc layers
 
