@@ -152,7 +152,7 @@ def train(args):
     
     epochs =args.epochs
     learning_rate = args.lr
-    # dtype = torch.float32
+    dtype = torch.float32
     ####################################################################################################
     ####################################################################################################
     ####################################################################################################
@@ -210,12 +210,16 @@ def train(args):
     ####################################################################################################
     ####################################################################################################
     ####################################################################################################
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
+    # lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[2, 10], gamma=0.1)
+
 
     model = model.to(device=device)  # move the model parameters to CPU/GPU
     max_val_acc = -1.0
     for epoch in range(epochs):
         print(f'Current, start epoch {epoch+1}')
+        # Update the learning rate at the start of each epoch
+        # lr_scheduler.step()
         for batch in tqdm(loader_train):
             x ,y = batch
             model.train()  # put model to training mode
@@ -251,7 +255,7 @@ def train(args):
         print('Val ACC: Got %d / %d correct (%.2f)' % (val_num_correct, val_num_samples, 100 * val_epoch_acc))
         print('-'*100)
 
-def check_accuracy(loader, model,print=False):
+def check_accuracy(loader, model,print_acc=False):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     dtype = torch.float32
 
@@ -269,7 +273,7 @@ def check_accuracy(loader, model,print=False):
             _, preds = scores.max(1)
             num_correct += (preds == y).sum()
             num_samples += preds.size(0)
-    if print:
+    if print_acc:
         epoch_acc = float(num_correct) / num_samples
         print('Got %d / %d correct (%.2f)' % (num_correct, num_samples, 100 * epoch_acc))
     return num_correct,num_samples
@@ -311,8 +315,8 @@ def get_args():
     parser.add_argument(
         "--option",
         type=str,
-        help="conv: convolutional layers; fc: linear only",
-        choices=("conv", "fc"),
+        help="conv: convolutional layers; fc: linear only; trans: conv + transformer",
+        choices=("conv", "fc", "trans"),
         default="fc",
     )
 

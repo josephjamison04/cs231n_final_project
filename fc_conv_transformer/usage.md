@@ -6,10 +6,10 @@
 
 ## for conv layers  
 
-    python fc.py --use_gpu --batch_size 64 --lr 1e-3 --epochs 3 --option conv 
+    python train.py --use_gpu --batch_size 64 --lr 1e-3 --epochs 3 --option conv 
 
 ## for fc layers
 
-    python fc.py --use_gpu --batch_size 64 --lr 1e-6 --epochs 10 --option fc
+    python train.py --use_gpu --batch_size 64 --lr 1e-6 --epochs 10 --option fc
 
 ## if want to add other stuff, go to fc.py bottom add more arguments, and also see more arguments
