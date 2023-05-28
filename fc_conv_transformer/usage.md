@@ -11,5 +11,8 @@
 ## for fc layers
 
     python train.py --use_gpu --batch_size 64 --lr 1e-6 --epochs 10 --option fc
+## for transformer layers
+
+    python train.py --use_gpu --batch_size 64 --lr 3e-5 --epochs 10 --option trans
 
 ## if want to add other stuff, go to fc.py bottom add more arguments, and also see more arguments

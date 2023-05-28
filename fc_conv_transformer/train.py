@@ -16,7 +16,7 @@ from tqdm import tqdm
 import time, random, numpy as np, argparse
 from types import SimpleNamespace
 
-from conv_transformer import PatchEmbedding, ImageTransformer
+from conv_transformer import ImageTransformer, VisionTransformer
 
 
 def load_data(args,train =True,valid = True,test = False):
@@ -89,12 +89,12 @@ class TensorDataset_transform(Dataset):
         return self.tensors[0].size(0)
 
 
-def save_model(model, optimizer, args=None, config=None):
+def save_model(model, optimizer, args=None, config=None,max_val_acc = None):
     filepath=args.filepath
     save_info = {
         "model": model.state_dict(),
-        "optim": optimizer.state_dict()
-        # "args": args,
+        "optim": optimizer.state_dict(),
+        "max_val_acc": max_val_acc,
         # "model_config": config,
         # "system_rng": random.getstate(),
         # "numpy_rng": np.random.get_state(),
@@ -206,12 +206,23 @@ def train(args):
     '''transformer'''
     if args.option == 'trans':
         num_classes = 100
-        model = ImageTransformer(patch_size=16, img_size=128, in_chans=3, embed_dim=768, num_classes=num_classes)
+        # model = ImageTransformer(patch_size=16, img_size=128, in_chans=3, embed_dim=768, num_classes=num_classes)
+        model = VisionTransformer(embed_dim = 768,
+            hidden_dim = 768,
+            num_channels = 3,
+            num_heads = 8,
+            num_layers = 6,
+            num_classes =100,
+            patch_size = 16,
+            num_patches = 64,
+            dropout=0.2,)
+
     ####################################################################################################
     ####################################################################################################
     ####################################################################################################
+    
     optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
-    # lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[2, 10], gamma=0.1)
+    lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[13, 20], gamma=0.1)
 
 
     model = model.to(device=device)  # move the model parameters to CPU/GPU
@@ -219,7 +230,6 @@ def train(args):
     for epoch in range(epochs):
         print(f'Current, start epoch {epoch+1}')
         # Update the learning rate at the start of each epoch
-        # lr_scheduler.step()
         for batch in tqdm(loader_train):
             x ,y = batch
             model.train()  # put model to training mode
@@ -243,14 +253,14 @@ def train(args):
             # Actually update the parameters of the model using the gradients
             # computed by the backwards pass.
             optimizer.step()
-
+        lr_scheduler.step()
         train_num_correct,train_num_samples =check_accuracy(loader_train,model,args)
         train_epoch_acc = float(train_num_correct) / train_num_samples
         val_num_correct,val_num_samples =check_accuracy(loader_val,model,args)
         val_epoch_acc = float(val_num_correct) / val_num_samples 
         if val_epoch_acc > max_val_acc:
             max_val_acc = val_epoch_acc
-            save_model(model,optimizer,args=args)
+            save_model(model,optimizer,args=args,max_val_acc=max_val_acc)
         print('Training ACC: Got %d / %d correct (%.2f)' % (train_num_correct, train_num_samples, 100 * train_epoch_acc))
         print('Val ACC: Got %d / %d correct (%.2f)' % (val_num_correct, val_num_samples, 100 * val_epoch_acc))
         print('-'*100)

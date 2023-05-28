@@ -6,3 +6,4 @@ new_env.yml
 *_norm.pkl
 CS231N_Project_Milestone.pdf
 *.pt
+*.pyc

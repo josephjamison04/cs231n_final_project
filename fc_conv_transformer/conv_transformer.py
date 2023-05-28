@@ -21,7 +21,7 @@ class ImageTransformer(nn.Module):
     def __init__(self, patch_size, img_size, in_chans, embed_dim, num_classes):
         super().__init__()
         self.patch_embedding = PatchEmbedding(patch_size, img_size, in_chans, embed_dim)
-        encoder_layer = nn.TransformerEncoderLayer(d_model=embed_dim, nhead=8)  
+        encoder_layer = nn.TransformerEncoderLayer(d_model=embed_dim, nhead=8,norm_first =True)  
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=4)  
         self.classifier = nn.Linear(embed_dim, num_classes)
 
