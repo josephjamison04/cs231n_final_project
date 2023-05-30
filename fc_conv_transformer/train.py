@@ -254,22 +254,29 @@ def train(args):
             # computed by the backwards pass.
             optimizer.step()
         lr_scheduler.step()
-        train_num_correct,train_num_samples =check_accuracy(loader_train,model,args)
+        train_num_correct,train_num_samples, t5_train_num_correct =check_accuracy(loader_train,model,args)
         train_epoch_acc = float(train_num_correct) / train_num_samples
-        val_num_correct,val_num_samples =check_accuracy(loader_val,model,args)
+        t5_train_epoch_acc = float(t5_train_num_correct) / train_num_samples
+        val_num_correct,val_num_samples, t5_val_num_correct =check_accuracy(loader_val,model,args)
         val_epoch_acc = float(val_num_correct) / val_num_samples 
+        t5_val_epoch_acc = float(t5_val_num_correct) / val_num_samples 
         if val_epoch_acc > max_val_acc:
             max_val_acc = val_epoch_acc
-            save_model(model,optimizer,args=args,max_val_acc=max_val_acc)
-        print('Training ACC: Got %d / %d correct (%.2f)' % (train_num_correct, train_num_samples, 100 * train_epoch_acc))
-        print('Val ACC: Got %d / %d correct (%.2f)' % (val_num_correct, val_num_samples, 100 * val_epoch_acc))
+            save_model(model,optimizer,args=args,max_val_acc=max_val_acc) # should we update this to save t5_acc too?
+        print('Top-1 Training ACC: Got %d / %d correct (%.2f)' % (train_num_correct, train_num_samples, 100 * train_epoch_acc))
+        print('Top-5 Training ACC: Got %d / %d correct (%.2f)' % (t5_train_num_correct, train_num_samples, 100 * t5_train_epoch_acc))
+        print('Top-1 Val ACC: Got %d / %d correct (%.2f)' % (val_num_correct, val_num_samples, 100 * val_epoch_acc))
+        print('Top-5 Val ACC: Got %d / %d correct (%.2f)' % (t5_val_num_correct, val_num_samples, 100 * t5_val_epoch_acc))
         print('-'*100)
 
 def check_accuracy(loader, model,print_acc=False):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     dtype = torch.float32
 
-    num_correct = 0
+    TOP_K = 5
+
+    t1_num_correct = 0
+    t5_num_correct = 0
     num_samples = 0
     model.eval()  # set model to evaluation mode
     with torch.no_grad():
@@ -280,13 +287,19 @@ def check_accuracy(loader, model,print_acc=False):
             x = x.to(device=device, dtype=dtype)  # move to device, e.g. GPU
             y = y.to(device=device, dtype=torch.long)
             scores = model(x)
-            _, preds = scores.max(1)
-            num_correct += (preds == y).sum()
-            num_samples += preds.size(0)
+            _, t1_preds = scores.max(1)
+            t1_num_correct += (t1_preds == y).sum()
+            # Calculate top_5 accuracy in addition to top-1
+            t5_preds = torch.argsort(-scores, dim=1)[:, :TOP_K]
+            t5_num_correct += (torch.any(t5_preds == y.unsqueeze(1).expand_as(t5_preds), 1)).sum()
+
+            num_samples += t1_preds.size(0)
     if print_acc:
-        epoch_acc = float(num_correct) / num_samples
-        print('Got %d / %d correct (%.2f)' % (num_correct, num_samples, 100 * epoch_acc))
-    return num_correct,num_samples
+        t1_epoch_acc = float(t1_num_correct) / num_samples
+        print('Got %d / %d correct (%.2f)' % (t1_num_correct, num_samples, 100 * t1_epoch_acc))
+        t5_epoch_acc = float(t5_num_correct) / num_samples
+        print('Got %d / %d correct (%.2f)' % (t5_num_correct, num_samples, 100 * t5_epoch_acc))
+    return t1_num_correct,num_samples, t5_num_correct
 
 
 def seed_everything(seed=11711):
