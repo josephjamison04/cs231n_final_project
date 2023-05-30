@@ -296,9 +296,9 @@ def check_accuracy(loader, model,print_acc=False):
             num_samples += t1_preds.size(0)
     if print_acc:
         t1_epoch_acc = float(t1_num_correct) / num_samples
-        print('Got %d / %d correct (%.2f)' % (t1_num_correct, num_samples, 100 * t1_epoch_acc))
+        print('Top-1: Got %d / %d correct (%.2f)' % (t1_num_correct, num_samples, 100 * t1_epoch_acc))
         t5_epoch_acc = float(t5_num_correct) / num_samples
-        print('Got %d / %d correct (%.2f)' % (t5_num_correct, num_samples, 100 * t5_epoch_acc))
+        print('Top-5: Got %d / %d correct (%.2f)' % (t5_num_correct, num_samples, 100 * t5_epoch_acc))
     return t1_num_correct,num_samples, t5_num_correct
 
 
