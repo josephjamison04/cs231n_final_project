@@ -10,6 +10,7 @@ import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
 from torch.utils.data import Dataset
 from torch.utils.data import sampler
+from torchvision import models
 import torchvision.transforms as T
 
 from tqdm import tqdm
@@ -216,6 +217,16 @@ def train(args):
             patch_size = 16,
             num_patches = 64,
             dropout=0.2,)
+    
+    ####################################################################################################
+    '''AlexNet'''
+    if args.option == 'alex':
+        num_classes = 100
+        model = models.alexnet(pretrained=True)
+        # set_parameter_requires_grad(model_ft, feature_extract)
+        num_ftrs = model.classifier[6].in_features
+        model.classifier[6] = nn.Linear(num_ftrs, num_classes)
+        # input_size = 224
 
     ####################################################################################################
     ####################################################################################################
@@ -339,7 +350,7 @@ def get_args():
         "--option",
         type=str,
         help="conv: convolutional layers; fc: linear only; trans: conv + transformer",
-        choices=("conv", "fc", "trans"),
+        choices=("conv", "fc", "trans", "alex"),
         default="fc",
     )
 
