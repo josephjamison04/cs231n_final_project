@@ -193,9 +193,9 @@ def train(args):
             x = x.to(device=device, dtype=dtype)  # move to device, e.g. GPU
             y = y.to(device=device, dtype=torch.long)
         # print(x.size())
-            scores = model(x)
-            print( f'shape of scores is {len(scores)}, while shape of y is {y.shape}')
-            print(f"type of scores[0] is {scores[0].type}")
+            scores = model(x)[0]
+            # print( f'shape of scores is {len(scores)}, while shape of y is {y.shape}')
+            # print(f"type of scores[0] is {scores[0].type}")
             
             loss = F.cross_entropy(scores, y)/args.batch_size
 
@@ -245,7 +245,7 @@ def check_accuracy(loader, model, print_acc=False):
                 x = x.reshape(-1,3*128*128)
             x = x.to(device=device, dtype=dtype)  # move to device, e.g. GPU
             y = y.to(device=device, dtype=torch.long)
-            scores = model(x)
+            scores = model(x)[0]
             _, t1_preds = scores.max(1)
             t1_num_correct += (t1_preds == y).sum()
             # Calculate top_5 accuracy in addition to top-1
