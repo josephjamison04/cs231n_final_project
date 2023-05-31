@@ -222,7 +222,7 @@ def train(args):
     '''AlexNet'''
     if args.option == 'alex':
         num_classes = 100
-        model = models.alexnet(pretrained=True)
+        model = models.alexnet(weights=models.AlexNet_Weights.DEFAULT)
         # set_parameter_requires_grad(model_ft, feature_extract)
         num_ftrs = model.classifier[6].in_features
         model.classifier[6] = nn.Linear(num_ftrs, num_classes)
