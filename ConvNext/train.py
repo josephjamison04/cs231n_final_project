@@ -105,7 +105,7 @@ def save_model(model, optimizer, args=None, config=None,max_val_acc = None):
         }
     
     torch.save(save_info, filepath)
-    print(f"save the model to {filepath}")
+    print(f"Saving model to {filepath}...")
 
 def flatten(x):
     N = x.shape[0] # read in N, C, H, W
@@ -308,7 +308,7 @@ def get_args():
 
 if __name__ == "__main__":
     args = get_args()
-    args.filepath = f"{args.option}-{args.epochs}-{args.lr}-cs231n.pt"  # save path
+    args.filepath = f"{args.option}-{args.epochs}epochs-{args.lr}-cs231n.pt"  # save path
     seed_everything(args.seed)
     train(args)
     
