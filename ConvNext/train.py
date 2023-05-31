@@ -193,10 +193,10 @@ def train(args):
             x = x.to(device=device, dtype=dtype)  # move to device, e.g. GPU
             y = y.to(device=device, dtype=torch.long)
         # print(x.size())
-            loss, _ = model(x)
+            scores = model(x)
 
             # print( f'shape of scores is {scores.shape}, while shape of y is {y.shape}')
-            # loss = F.cross_entropy(scores, y)/args.batch_size
+            loss = F.cross_entropy(scores, y)/args.batch_size
 
             # Zero out all of the gradients for the variables which the optimizer
             # will update.
@@ -244,7 +244,7 @@ def check_accuracy(loader, model, print_acc=False):
                 x = x.reshape(-1,3*128*128)
             x = x.to(device=device, dtype=dtype)  # move to device, e.g. GPU
             y = y.to(device=device, dtype=torch.long)
-            _, scores = model(x)
+            scores = model(x)
             _, t1_preds = scores.max(1)
             t1_num_correct += (t1_preds == y).sum()
             # Calculate top_5 accuracy in addition to top-1
