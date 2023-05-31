@@ -167,8 +167,9 @@ def train(args):
         if args.from_pretrain:
             # Initializing a model (with random weights) from the convnext-tiny-224 style configuration
             model = ConvNextForImageClassification.from_pretrained("facebook/convnext-tiny-224")
-        if not args.from_pretrain:
-            model = ConvNextForImageClassification(configuration)
+        else:
+            # Initialize with random weights
+            model = ConvNextForImageClassification(configuration) 
     
 
     ####################################################################################################
@@ -272,9 +273,9 @@ def get_args():
     parser.add_argument("--epochs", type=int, default=10)
 
     parser.add_argument("--use_gpu", action="store_true")
-    parser.add_argument("--small_data", action="store_true")
+    parser.add_argument("--small_data", action="store_true") 
     parser.add_argument("--norm", action="store_true")
-    parser.add_argument("--from_pretrain", action="store_false") # defaults to false (i.e. random weight init)
+    parser.add_argument("--from_pretrain", action="store_true") 
     
 
     # hyper parameters
