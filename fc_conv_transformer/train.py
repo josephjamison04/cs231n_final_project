@@ -208,8 +208,8 @@ def train(args):
     if args.option == 'trans':
         num_classes = 100
         # model = ImageTransformer(patch_size=16, img_size=128, in_chans=3, embed_dim=768, num_classes=num_classes)
-        model = VisionTransformer(embed_dim = 768,
-            hidden_dim = 768,
+        model = VisionTransformer(embed_dim = 512,
+            hidden_dim = 1024,
             num_channels = 3,
             num_heads = 8,
             num_layers = 6,
