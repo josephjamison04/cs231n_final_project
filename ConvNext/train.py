@@ -39,8 +39,8 @@ def load_data(args,train =True,valid = True,test = False):
         y_train = pd.read_pickle(data_dir + "train_labels.pkl").values
         y_train = y_train.flatten().astype(labels_dtype)
         if args.small_data:
-            X_train = X_train[:4000,:]
-            y_train = y_train[:4000]
+            X_train = X_train[:10000,:]
+            y_train = y_train[:10000]
         if args.reshape:
             print(X_train.shape)
             X_train = X_train.reshape(-1, 3, 128, 128)
@@ -116,7 +116,6 @@ def flatten(x):
 class Flatten(nn.Module):
     def forward(self, x):
         return flatten(x)
-
 
 
 
