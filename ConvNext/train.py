@@ -194,8 +194,8 @@ def train(args):
             y = y.to(device=device, dtype=torch.long)
         # print(x.size())
             scores = model(x)
-
-            # print( f'shape of scores is {scores.shape}, while shape of y is {y.shape}')
+            print( f'shape of scores is {scores.shape}, while shape of y is {y.shape}')
+            
             loss = F.cross_entropy(scores, y)/args.batch_size
 
             # Zero out all of the gradients for the variables which the optimizer
