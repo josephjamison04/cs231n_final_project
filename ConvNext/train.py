@@ -162,7 +162,7 @@ def train(args):
     if args.option == 'convNext':
         
         # Initializing a ConvNext convnext-tiny-224 style configuration
-        configuration = ConvNextConfig(num_labels= 100, return_dict=False)
+        configuration = ConvNextConfig(num_labels= 100, image_size= 128, return_dict=False)
 
         if args.from_pretrain:
             # Initializing a model (with random weights) from the convnext-tiny-224 style configuration
