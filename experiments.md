@@ -40,9 +40,29 @@
 
 ## AlexNet Finetune Experiment (with hyperparameters specified below)
 ## Training time: ~10 min
+
 ## Top-1 Training ACC: Got 18662 / 64000 correct (29.16)
 ## Top-5 Training ACC: Got 37478 / 64000 correct (58.56)
 ## Top-1 Val ACC: Got 3296 / 16000 correct (20.60)
 ## Top-5 Val ACC: Got 7632 / 16000 correct (47.70)
 
 python train.py --use_gpu --batch_size 64 --lr 1e-5 --epochs 3 --option alex
+
+##########################################################################################
+
+## ConvNext Experiment (without finetuning, hyperparameters as below)
+## Training time ~ 50 minutes 
+
+## Top-1 Training ACC: Got 3836 / 64000 correct (5.99)
+## Top-5 Training ACC: Got 13670 / 64000 correct (21.36)
+## Top-1 Val ACC: Got 916 / 16000 correct (5.73)
+## Top-5 Val ACC: Got 3259 / 16000 correct (20.37)
+
+python train.py --use_gpu --batch_size 64 --lr 1e-5 --epochs 3 --option convNext
+
+##########################################################################################
+
+## ConvNext Experiment (without finetuning, hyperparameters as below)
+
+
+python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 3 --option convNext
