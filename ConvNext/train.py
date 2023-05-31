@@ -193,9 +193,10 @@ def train(args):
             x = x.to(device=device, dtype=dtype)  # move to device, e.g. GPU
             y = y.to(device=device, dtype=torch.long)
         # print(x.size())
-            scores = model(x)
+            loss, _ = model(x)
+
             # print( f'shape of scores is {scores.shape}, while shape of y is {y.shape}')
-            loss = F.cross_entropy(scores, y)/args.batch_size
+            # loss = F.cross_entropy(scores, y)/args.batch_size
 
             # Zero out all of the gradients for the variables which the optimizer
             # will update.
@@ -209,12 +210,14 @@ def train(args):
             # computed by the backwards pass.
             optimizer.step()
         lr_scheduler.step()
+        
         t1_train_num_correct,train_num_samples, t5_train_num_correct =check_accuracy(loader_train,model,args)
         t1_train_epoch_acc = float(t1_train_num_correct) / train_num_samples
         t5_train_epoch_acc = float(t5_train_num_correct) / train_num_samples
         t1_val_num_correct,val_num_samples, t5_val_num_correct =check_accuracy(loader_val,model,args)
         t1_val_epoch_acc = float(t1_val_num_correct) / val_num_samples 
         t5_val_epoch_acc = float(t5_val_num_correct) / val_num_samples 
+        
         if t1_val_epoch_acc > max_val_acc:
             max_val_acc = t1_val_epoch_acc
             save_model(model,optimizer,args=args,max_val_acc=max_val_acc) # should we update this to save t5_acc too?
@@ -224,7 +227,7 @@ def train(args):
         print('Top-5 Val ACC: Got %d / %d correct (%.2f)' % (t5_val_num_correct, val_num_samples, 100 * t5_val_epoch_acc))
         print('-'*100)
 
-def check_accuracy(loader, model,print_acc=False):
+def check_accuracy(loader, model, print_acc=False):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     dtype = torch.float32
 
@@ -241,7 +244,7 @@ def check_accuracy(loader, model,print_acc=False):
                 x = x.reshape(-1,3*128*128)
             x = x.to(device=device, dtype=dtype)  # move to device, e.g. GPU
             y = y.to(device=device, dtype=torch.long)
-            scores = model(x)
+            _, scores = model(x)
             _, t1_preds = scores.max(1)
             t1_num_correct += (t1_preds == y).sum()
             # Calculate top_5 accuracy in addition to top-1
