@@ -1,6 +1,10 @@
+##########################################################################################
+
 ## 20 min total training with code following
-**Training ACC: Got 16775 / 64000 correct (26.21)**  
-**Val ACC: Got 2920 / 16000 correct (18.25)** 
+## Top-1 Training ACC: Got 16775 / 64000 correct (26.21)
+## Top-5 Training ACC: Got 35209 / 64000 correct (55.01)
+## Top-1 Val ACC: Got 2920 / 16000 correct (18.25)
+## Top-5 Val ACC: Got 6943 / 16000 correct (43.39)
 
     python train.py --use_gpu --batch_size 64 --lr 3e-5 --epochs 10 --option trans
     '''model = VisionTransformer(embed_dim = 512,
@@ -12,6 +16,8 @@
             patch_size = 16,
             num_patches = 64,
             dropout=0.2,)'''
+
+##########################################################################################
 
 ## 50 min total training with code following          
 ## Top-1 Training ACC: Got 21191 / 64000 correct (33.11)
@@ -29,6 +35,8 @@
             patch_size = 16,
             num_patches = 64,
             dropout=0.2,)'''
+
+##########################################################################################
 
 ## AlexNet Finetune Experiment (with hyperparameters specified below)
 ## Training time: ~10 min

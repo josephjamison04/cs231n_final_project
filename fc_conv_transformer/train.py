@@ -265,18 +265,18 @@ def train(args):
             # computed by the backwards pass.
             optimizer.step()
         lr_scheduler.step()
-        train_num_correct,train_num_samples, t5_train_num_correct =check_accuracy(loader_train,model,args)
-        train_epoch_acc = float(train_num_correct) / train_num_samples
+        t1_train_num_correct,train_num_samples, t5_train_num_correct =check_accuracy(loader_train,model,args)
+        t1_train_epoch_acc = float(t1_train_num_correct) / train_num_samples
         t5_train_epoch_acc = float(t5_train_num_correct) / train_num_samples
-        val_num_correct,val_num_samples, t5_val_num_correct =check_accuracy(loader_val,model,args)
-        val_epoch_acc = float(val_num_correct) / val_num_samples 
+        t1_val_num_correct,val_num_samples, t5_val_num_correct =check_accuracy(loader_val,model,args)
+        t1_val_epoch_acc = float(t1_val_num_correct) / val_num_samples 
         t5_val_epoch_acc = float(t5_val_num_correct) / val_num_samples 
-        if val_epoch_acc > max_val_acc:
-            max_val_acc = val_epoch_acc
+        if t1_val_epoch_acc > max_val_acc:
+            max_val_acc = t1_val_epoch_acc
             save_model(model,optimizer,args=args,max_val_acc=max_val_acc) # should we update this to save t5_acc too?
-        print('Top-1 Training ACC: Got %d / %d correct (%.2f)' % (train_num_correct, train_num_samples, 100 * train_epoch_acc))
+        print('Top-1 Training ACC: Got %d / %d correct (%.2f)' % (t1_train_num_correct, train_num_samples, 100 * t1_train_epoch_acc))
         print('Top-5 Training ACC: Got %d / %d correct (%.2f)' % (t5_train_num_correct, train_num_samples, 100 * t5_train_epoch_acc))
-        print('Top-1 Val ACC: Got %d / %d correct (%.2f)' % (val_num_correct, val_num_samples, 100 * val_epoch_acc))
+        print('Top-1 Val ACC: Got %d / %d correct (%.2f)' % (t1_val_num_correct, val_num_samples, 100 * t1_val_epoch_acc))
         print('Top-5 Val ACC: Got %d / %d correct (%.2f)' % (t5_val_num_correct, val_num_samples, 100 * t5_val_epoch_acc))
         print('-'*100)
 
@@ -305,11 +305,11 @@ def check_accuracy(loader, model,print_acc=False):
             t5_num_correct += (torch.any(t5_preds == y.unsqueeze(1).expand_as(t5_preds), 1)).sum()
 
             num_samples += t1_preds.size(0)
-    if print_acc:
-        t1_epoch_acc = float(t1_num_correct) / num_samples
-        print('Top-1: Got %d / %d correct (%.2f)' % (t1_num_correct, num_samples, 100 * t1_epoch_acc))
-        t5_epoch_acc = float(t5_num_correct) / num_samples
-        print('Top-5: Got %d / %d correct (%.2f)' % (t5_num_correct, num_samples, 100 * t5_epoch_acc))
+    # if print_acc:
+    #     t1_epoch_acc = float(t1_num_correct) / num_samples
+    #     print('Top-1: Got %d / %d correct (%.2f)' % (t1_num_correct, num_samples, 100 * t1_epoch_acc))
+    #     t5_epoch_acc = float(t5_num_correct) / num_samples
+    #     print('Top-5: Got %d / %d correct (%.2f)' % (t5_num_correct, num_samples, 100 * t5_epoch_acc))
     return t1_num_correct,num_samples, t5_num_correct
 
 
