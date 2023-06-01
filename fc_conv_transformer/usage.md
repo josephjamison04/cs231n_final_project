@@ -19,4 +19,8 @@
 
     python train.py --use_gpu --batch_size 64 --lr 1e-5 --epochs 3 --option alex
 
+## for ResNet18 model
+
+    python train.py --use_gpu --batch_size 64 --lr 1e-5 --epochs 3 --option resnet
+
 ## if want to add other stuff, go to fc.py bottom add more arguments, and also see more arguments

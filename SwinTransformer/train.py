@@ -13,11 +13,13 @@ from torch.utils.data import sampler
 from torchvision import models
 import torchvision.transforms as T
 
+from transformers import ConvNextConfig, ConvNextForImageClassification
+
 from tqdm import tqdm
 import time, random, numpy as np, argparse
 from types import SimpleNamespace
 
-from conv_transformer import ImageTransformer, VisionTransformer
+# from conv_transformer import ImageTransformer, VisionTransformer
 
 
 def load_data(args,train =True,valid = True,test = False):
@@ -37,8 +39,8 @@ def load_data(args,train =True,valid = True,test = False):
         y_train = pd.read_pickle(data_dir + "train_labels.pkl").values
         y_train = y_train.flatten().astype(labels_dtype)
         if args.small_data:
-            X_train = X_train[:4000,:]
-            y_train = y_train[:4000]
+            X_train = X_train[:10000,:]
+            y_train = y_train[:10000]
         if args.reshape:
             print(X_train.shape)
             X_train = X_train.reshape(-1, 3, 128, 128)
@@ -103,7 +105,7 @@ def save_model(model, optimizer, args=None, config=None,max_val_acc = None):
         }
     
     torch.save(save_info, filepath)
-    print(f"save the model to {filepath}")
+    print(f"Saving model to {filepath}...")
 
 def flatten(x):
     N = x.shape[0] # read in N, C, H, W
@@ -114,7 +116,6 @@ def flatten(x):
 class Flatten(nn.Module):
     def forward(self, x):
         return flatten(x)
-
 
 
 
@@ -157,87 +158,19 @@ def train(args):
     ####################################################################################################
     ####################################################################################################
     ####################################################################################################
-    '''model_fc'''
-    if args.option == 'fc':
-        input_size = 3 * 128 * 128  # image size
-        num_classes = 100  # number of classes
-        model = nn.Sequential(
-            nn.Linear(input_size, 256),
-            nn.ReLU(),
-            nn.Linear(256, num_classes)
-            )
-    ####################################################################################################
-    '''model_conv_max'''
-    if args.option == 'conv':
-        input_h = 128
-        channel_1 = 16
-        channel_2 = 32
-        channel_3 = 16
-        channel_4 = 32
-        num_classes = 100
-        # First pool layer
-        kernel_size_1 = 2
-        h_out_pool_1 = (input_h - (kernel_size_1 - 1)-1) / kernel_size_1 + 1
+    '''ConvNext model'''
+    if args.option == 'convNext':
+        
+        # Initializing a ConvNext convnext-tiny-224 style configuration
+        configuration = ConvNextConfig(num_labels= 100, image_size= 128, return_dict=False)
 
-        # Second pool layer
-        kernel_size_2 = 4
-        h_out_pool_2 = (h_out_pool_1 - (kernel_size_2 - 1)-1) / kernel_size_2 + 1
-
-        channel_out = int(channel_4 * h_out_pool_2 * h_out_pool_2) # flattened output size for affine
-        model = nn.Sequential(
-            # Layer 1: Conv - batchnorm - relu - conv - batchnorm - relu - maxpool
-            nn.Conv2d(in_channels= 3, out_channels= channel_1, kernel_size= (7,7), padding=3),
-            nn.BatchNorm2d(channel_1),
-            nn.ReLU(),
-            nn.Conv2d(in_channels= channel_1, out_channels= channel_2, kernel_size= (5,5), padding=2),
-            nn.BatchNorm2d(channel_2),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size= kernel_size_1),
-            # Layer 2: Conv - batchnorm - relu - conv - relu - maxpool
-            nn.Conv2d(in_channels= channel_2, out_channels= channel_3, kernel_size= (3,3), padding=1),
-            nn.BatchNorm2d(channel_3),
-            nn.ReLU(),
-            nn.Conv2d(in_channels= channel_3, out_channels= channel_4, kernel_size= (1,1), padding=0),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size= kernel_size_2),
-            # Output: Affine
-            Flatten(),
-            nn.Linear(channel_out, num_classes))
-    ####################################################################################################
-    '''transformer'''
-    if args.option == 'trans':
-        num_classes = 100
-        # model = ImageTransformer(patch_size=16, img_size=128, in_chans=3, embed_dim=768, num_classes=num_classes)
-        model = VisionTransformer(embed_dim = 512,
-            hidden_dim = 1024,
-            num_channels = 3,
-            num_heads = 8,
-            num_layers = 6,
-            num_classes =100,
-            patch_size = 16,
-            num_patches = 64,
-            dropout=0.2,)
+        if args.from_pretrain:
+            # Initializing a model (with random weights) from the convnext-tiny-224 style configuration
+            model = ConvNextForImageClassification.from_pretrained("facebook/convnext-tiny-224")
+        else:
+            # Initialize with random weights
+            model = ConvNextForImageClassification(configuration) 
     
-    ####################################################################################################
-    '''AlexNet'''
-    if args.option == 'alex':
-        num_classes = 100
-        model = models.alexnet(weights=models.AlexNet_Weights.DEFAULT)
-        # set_parameter_requires_grad(model_ft, feature_extract)
-        num_ftrs = model.classifier[6].in_features
-        model.classifier[6] = nn.Linear(num_ftrs, num_classes)
-        # input_size = 224
-    
-    #########
-    
-    '''ResNet'''
-    if args.option == 'resnet':
-        num_classes = 100
-        model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
-        # set_parameter_requires_grad(model_ft, feature_extract)
-        num_ftrs = model.fc.in_features
-        model.fc = nn.Linear(num_ftrs, num_classes)
-        # input_size = 224
 
     ####################################################################################################
     ####################################################################################################
@@ -260,8 +193,9 @@ def train(args):
             x = x.to(device=device, dtype=dtype)  # move to device, e.g. GPU
             y = y.to(device=device, dtype=torch.long)
         # print(x.size())
-            scores = model(x)
-            # print( f'shape of scores is {scores.shape}, while shape of y is {y.shape}')
+            scores = model(x)[0]
+            # print( f'shape of scores is {len(scores)}, while shape of y is {y.shape}')
+            
             loss = F.cross_entropy(scores, y)/args.batch_size
 
             # Zero out all of the gradients for the variables which the optimizer
@@ -276,12 +210,14 @@ def train(args):
             # computed by the backwards pass.
             optimizer.step()
         lr_scheduler.step()
+        
         t1_train_num_correct,train_num_samples, t5_train_num_correct =check_accuracy(loader_train,model,args)
         t1_train_epoch_acc = float(t1_train_num_correct) / train_num_samples
         t5_train_epoch_acc = float(t5_train_num_correct) / train_num_samples
         t1_val_num_correct,val_num_samples, t5_val_num_correct =check_accuracy(loader_val,model,args)
         t1_val_epoch_acc = float(t1_val_num_correct) / val_num_samples 
         t5_val_epoch_acc = float(t5_val_num_correct) / val_num_samples 
+        
         if t1_val_epoch_acc > max_val_acc:
             max_val_acc = t1_val_epoch_acc
             save_model(model,optimizer,args=args,max_val_acc=max_val_acc) # should we update this to save t5_acc too?
@@ -291,7 +227,7 @@ def train(args):
         print('Top-5 Val ACC: Got %d / %d correct (%.2f)' % (t5_val_num_correct, val_num_samples, 100 * t5_val_epoch_acc))
         print('-'*100)
 
-def check_accuracy(loader, model,print_acc=False):
+def check_accuracy(loader, model, print_acc=False):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     dtype = torch.float32
 
@@ -308,7 +244,7 @@ def check_accuracy(loader, model,print_acc=False):
                 x = x.reshape(-1,3*128*128)
             x = x.to(device=device, dtype=dtype)  # move to device, e.g. GPU
             y = y.to(device=device, dtype=torch.long)
-            scores = model(x)
+            scores = model(x)[0]
             _, t1_preds = scores.max(1)
             t1_num_correct += (t1_preds == y).sum()
             # Calculate top_5 accuracy in addition to top-1
@@ -340,8 +276,10 @@ def get_args():
     parser.add_argument("--epochs", type=int, default=10)
 
     parser.add_argument("--use_gpu", action="store_true")
-    parser.add_argument("--small_data", action="store_true")
+    parser.add_argument("--small_data", action="store_true") 
     parser.add_argument("--norm", action="store_true")
+    parser.add_argument("--from_pretrain", action="store_true") 
+    
 
     # hyper parameters
     parser.add_argument(
@@ -360,8 +298,8 @@ def get_args():
     parser.add_argument(
         "--option",
         type=str,
-        help="conv: convolutional layers; fc: linear only; trans: conv + transformer",
-        choices=("conv", "fc", "trans", "alex", "resnet"),
+        help="convNext: convNext-style model architecture",
+        choices=("convNext"),
         default="fc",
     )
 
@@ -370,7 +308,10 @@ def get_args():
 
 if __name__ == "__main__":
     args = get_args()
-    args.filepath = f"{args.option}-{args.epochs}-{args.lr}-cs231n.pt"  # save path
+    if args.from_pretrain:
+        args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-{args.lr}-cs231n.pt"  # save path
+    else:
+        args.filepath = f"{args.option}-{args.epochs}epochs-{args.lr}-cs231n.pt"  # save path
     seed_everything(args.seed)
     train(args)
     
