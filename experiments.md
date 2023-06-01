@@ -51,7 +51,7 @@ python train.py --use_gpu --batch_size 64 --lr 1e-5 --epochs 3 --option alex
 ##########################################################################################
 
 ## ConvNext Experiment (without finetuning, hyperparameters as below)
-## Training time ~ 50 minutes 
+## Training time ~ 30 minutes 
 
 ## Top-1 Training ACC: Got 3836 / 64000 correct (5.99)
 ## Top-5 Training ACC: Got 13670 / 64000 correct (21.36)
@@ -63,6 +63,25 @@ python train.py --use_gpu --batch_size 64 --lr 1e-5 --epochs 3 --option convNext
 ##########################################################################################
 
 ## ConvNext Experiment (without finetuning, hyperparameters as below)
+## Training Time ~ 30 min
 
+## Top-1 Training ACC: Got 9700 / 64000 correct (15.16)
+## Top-5 Training ACC: Got 25373 / 64000 correct (39.65)
+## Top-1 Val ACC: Got 2240 / 16000 correct (14.00)
+## Top-5 Val ACC: Got 5933 / 16000 correct (37.08)
 
 python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 3 --option convNext
+
+##########################################################################################
+
+## ConvNext Experiment (without finetuning, hyperparameters as below)
+## Training Time ~70 minutes
+
+## Top-1 Training ACC: Got 28021 / 64000 correct (43.78)
+## Top-5 Training ACC: Got 47840 / 64000 correct (74.75)
+## Top-1 Val ACC: Got 3373 / 16000 correct (21.08)
+## Top-5 Val ACC: Got 7696 / 16000 correct (48.10)
+
+## Val accuracy decreased slightly after 7 epochs while training still increased -> overfitting
+
+python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 10 --option convNext
