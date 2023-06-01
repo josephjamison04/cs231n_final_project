@@ -45,7 +45,7 @@
 
 # AlexNet
 
-## Experiment 1 - Finetune
+## Experiment 1 - start with pretrained weights then finetune
 
 Training time: ~10 min
 
@@ -115,20 +115,83 @@ Training Time ~60 minutes
 
 ---
 
-# ResNet
+# ResNet18
 
-## Experiment 1 - without finetuning
+## Experiment 1 - start with pretrained weights then finetune
 
-Training time: 7 mins.
+Training time: ~3 mins. per epoch
 
-- Top-1 Training ACC: Got 31760 / 64000 correct (49.62)
-- Top-5 Training ACC: Got 50808 / 64000 correct (79.39)
-- Top-1 Val ACC: Got 6732 / 16000 correct (42.08)
-- Top-5 Val ACC: Got 11648 / 16000 correct (72.80)
+### At epoch 4:
+- Top-1 Training ACC: Got 35121 / 64000 correct (54.88)
+- Top-5 Training ACC: Got 53314 / 64000 correct (83.30)
+- Top-1 Val ACC: Got 7160 / 16000 correct (44.75)
+- Top-5 Val ACC: Got 12075 / 16000 correct (75.47)
 
-```python train.py --use_gpu --batch_size 64 --lr 1e-5 --epochs 3 --option resnet```
+### At epoch 7:
+- Top-1 Training ACC: Got 43268 / 64000 correct (67.61)
+- Top-5 Training ACC: Got 58188 / 64000 correct (90.92)
+- Top-1 Val ACC: Got 7698 / 16000 correct (48.11)
+- Top-5 Val ACC: Got 12541 / 16000 correct (78.38)
 
-## Experiment 2 - without finetuning
+### At epoch 10:
+- Top-1 Training ACC: Got 50704 / 64000 correct (79.22)
+- Top-5 Training ACC: Got 61210 / 64000 correct (95.64)
+- Top-1 Val ACC: Got 7753 / 16000 correct (48.46)
+- Top-5 Val ACC: Got 12610 / 16000 correct (78.81)
 
-```python train.py --use_gpu --batch_size 64 --lr 1e-5 --epochs 10 --option resnet```
+- No overfitting even after 10 epochs but val accuracy increases very slowly
 
+```python train.py --use_gpu --batch_size 64 --lr 1e-5 --epochs 10 --option resnet18```
+
+## Experiment 2
+
+### At epoch 2: 
+- Top-1 Training ACC: Got 47846 / 64000 correct (74.76)
+- Top-5 Training ACC: Got 60269 / 64000 correct (94.17)
+- Top-1 Val ACC: Got 7917 / 16000 correct (49.48)
+- Top-5 Val ACC: Got 12714 / 16000 correct (79.46)
+
+### At epoch 4:
+- Top-1 Training ACC: Got 60517 / 64000 correct (94.56)
+- Top-5 Training ACC: Got 63853 / 64000 correct (99.77)
+- Top-1 Val ACC: Got 7609 / 16000 correct (47.56)
+- Top-5 Val ACC: Got 12380 / 16000 correct (77.38)
+
+- Early stop at epoch 4: val accuracy falling after epoch 3, overfitting
+
+```python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 10 --option resnet18```
+
+## Experiment 3
+
+### At epoch 3: 
+- Top-1 Training ACC: Got 51760 / 64000 correct (80.88)
+- Top-5 Training ACC: Got 61552 / 64000 correct (96.17)
+- Top-1 Val ACC: Got 7958 / 16000 correct (49.74)
+- Top-5 Val ACC: Got 12726 / 16000 correct (79.54)
+
+### At epoch 5:
+- Top-1 Training ACC: Got 62215 / 64000 correct (97.21)
+- Top-5 Training ACC: Got 63886 / 64000 correct (99.82)
+- Top-1 Val ACC: Got 7708 / 16000 correct (48.18)
+- Top-5 Val ACC: Got 12420 / 16000 correct (77.62)
+
+- Early stop at epoch 5: val accuracy falling after epoch 4, overfitting
+
+```python train.py --use_gpu --batch_size 64 --lr 5e-5 --epochs 10 --option resnet18```
+
+---
+
+# ResNet50
+
+## Experiment 1 - start with pretrained weights then finetune
+
+Training time: 6 mins. per epoch
+
+### At epoch 3:
+- Top-1 Training ACC: Got 36503 / 64000 correct (57.04)
+- Top-5 Training ACC: Got 54384 / 64000 correct (84.97)
+- Top-1 Val ACC: Got 7853 / 16000 correct (49.08)
+- Top-5 Val ACC: Got 12703 / 16000 correct (79.39)
+
+
+```python train.py --use_gpu --batch_size 64 --lr 1e-5 --epochs 10 --option resnet50```

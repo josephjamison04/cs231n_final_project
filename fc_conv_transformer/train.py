@@ -230,10 +230,19 @@ def train(args):
     
     #########
     
-    '''ResNet'''
-    if args.option == 'resnet':
+    '''ResNet18'''
+    if args.option == 'resnet18':
         num_classes = 100
         model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+        # set_parameter_requires_grad(model_ft, feature_extract)
+        num_ftrs = model.fc.in_features
+        model.fc = nn.Linear(num_ftrs, num_classes)
+        # input_size = 224
+        
+    '''ResNet50'''
+    if args.option == 'resnet50':
+        num_classes = 100
+        model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
         # set_parameter_requires_grad(model_ft, feature_extract)
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, num_classes)
@@ -361,7 +370,7 @@ def get_args():
         "--option",
         type=str,
         help="conv: convolutional layers; fc: linear only; trans: conv + transformer",
-        choices=("conv", "fc", "trans", "alex", "resnet"),
+        choices=("conv", "fc", "trans", "alex", "resnet18", "resnet50"),
         default="fc",
     )
 
