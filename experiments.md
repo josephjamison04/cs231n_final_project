@@ -187,11 +187,12 @@ Training time: ~3 mins. per epoch
 
 Training time: 6 mins. per epoch
 
-### At epoch 3:
-- Top-1 Training ACC: Got 36503 / 64000 correct (57.04)
-- Top-5 Training ACC: Got 54384 / 64000 correct (84.97)
-- Top-1 Val ACC: Got 7853 / 16000 correct (49.08)
-- Top-5 Val ACC: Got 12703 / 16000 correct (79.39)
+### At epoch 9:
+- Top-1 Training ACC: Got 53790 / 64000 correct (84.05)
+- Top-5 Training ACC: Got 62198 / 64000 correct (97.18)
+- Top-1 Val ACC: Got 8682 / 16000 correct (54.26)
+- Top-5 Val ACC: Got 13346 / 16000 correct (83.41)
 
+- Overfitting after 9 epochs 
 
 ```python train.py --use_gpu --batch_size 64 --lr 1e-5 --epochs 10 --option resnet50```

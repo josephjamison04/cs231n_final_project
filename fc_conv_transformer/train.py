@@ -14,7 +14,7 @@ from torchvision import models
 import torchvision.transforms as T
 
 from tqdm import tqdm
-import time, random, numpy as np, argparse
+import time, random, numpy as np, argparse, datetime
 from types import SimpleNamespace
 
 from conv_transformer import ImageTransformer, VisionTransformer
@@ -255,9 +255,20 @@ def train(args):
     optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[13, 20], gamma=0.1)
 
+    # Write header of log file
+    with open(args.logpath, "a+") as f:
+        result = f"lr: {args.lr} \t batchsize: {args.batch_size} \t epochs: {args.epochs} \t option: {args.option} \n"
+        result += "----------------- \n"
+        f.write(result)
 
     model = model.to(device=device)  # move the model parameters to CPU/GPU
     max_val_acc = -1.0
+    t1_train_accs = []
+    t5_train_accs = []
+    t1_val_accs = []
+    t5_val_accs = []
+    train_loss = []
+    
     for epoch in range(epochs):
         print(f'Current, start epoch {epoch+1}')
         # Update the learning rate at the start of each epoch
@@ -299,6 +310,43 @@ def train(args):
         print('Top-1 Val ACC: Got %d / %d correct (%.2f)' % (t1_val_num_correct, val_num_samples, 100 * t1_val_epoch_acc))
         print('Top-5 Val ACC: Got %d / %d correct (%.2f)' % (t5_val_num_correct, val_num_samples, 100 * t5_val_epoch_acc))
         print('-'*100)
+        
+        # Append current epoch results to log file
+        with open(args.logpath, "a+") as f:
+            epoch_str = f"Epoch: {epoch + 1} \n"
+            epoch_str += f"Top-1 Training ACC: {t1_train_epoch_acc} \n"
+            epoch_str += f"Top-5 Training ACC: {t5_train_epoch_acc} \n"
+            epoch_str += f"Top-1 Val ACC: {t1_val_epoch_acc} \n"
+            epoch_str += f"Top-5 Val ACC: {t5_val_epoch_acc} \n"
+            epoch_str += f"Training Loss: {loss.item()} \n"
+            epoch_str += "----------------- \n"
+            f.write(epoch_str)
+            print(f"Write results to {args.logpath}")
+        
+        t1_train_accs.append(t1_train_epoch_acc)
+        t5_train_accs.append(t5_train_epoch_acc)
+        t1_val_accs.append(t1_val_epoch_acc)
+        t5_val_accs.append(t5_val_epoch_acc)
+        train_loss.append(loss.item())
+        
+        # log(args, t1_train_accs, t5_train_accs, t1_val_accs, t5_val_accs, train_loss)
+
+# Not used, implemented directly in train()
+def log(args, t1_train_accs, t5_train_accs, t1_val_accs, t5_val_accs, train_loss):
+    with open(args.logpath, "w+") as f:
+        result = f"lr: {args.lr} \t batchsize: {args.batch_size} \t epochs: {args.epochs} \t option: {args.option} \n"
+        result += "----------------- \n"
+        for i in range(args.epochs):
+            epoch_str = f"Epoch: {i} \n"
+            epoch_str += f"Top-1 Training ACC: {t1_train_accs[i]} \n"
+            epoch_str += f"Top-5 Training ACC: {t5_train_accs[i]} \n"
+            epoch_str += f"Top-1 Val ACC: {t1_val_accs[i]} \n"
+            epoch_str += f"Top-5 Val ACC: {t5_val_accs[i]} \n"
+            epoch_str += f"Training Loss: {train_loss[i]} \n"
+            epoch_str += "----------------- \n"
+            result += epoch_str
+        f.write(result)
+        print(f"Write results to {args.logpath}")
 
 def check_accuracy(loader, model,print_acc=False):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -380,6 +428,8 @@ def get_args():
 if __name__ == "__main__":
     args = get_args()
     args.filepath = f"{args.option}-{args.epochs}-{args.lr}-cs231n.pt"  # save path
+    now = datetime.datetime.now()
+    args.logpath = f"logs/{args.option}-{args.epochs}-{args.lr}_{now.hour}_{now.minute}_{now.second}.txt"  # save path
     seed_everything(args.seed)
     train(args)
     
