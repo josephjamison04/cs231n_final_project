@@ -85,3 +85,11 @@ python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 3 --option convNext
 ## Val accuracy decreased slightly after 7 epochs while training still increased -> overfitting
 
 python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 10 --option convNext
+
+##########################################################################################
+
+## ConvNext Experiment (with finetuning, hyperparameters as below)
+## Training Time 
+
+
+python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 10 --option convNext --from_pretrain
