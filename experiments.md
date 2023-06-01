@@ -88,8 +88,19 @@ python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 10 --option convNex
 
 ##########################################################################################
 
-## ConvNext Experiment (with finetuning, hyperparameters as below)
-## Training Time 
+## ConvNext Experiment (from pretrained weights, with finetuning, hyperparameters as below)
+## Training Time ~60 minutes
 
+## At epoch 3:
+## Top-1 Training ACC: Got 50590 / 64000 correct (79.05)
+## Top-5 Training ACC: Got 61443 / 64000 correct (96.00)
+## Top-1 Val ACC: Got 8236 / 16000 correct (51.48)
+## Top-5 Val ACC: Got 12998 / 16000 correct (81.24)
+
+## At epoch 10:
+## Top-1 Training ACC: Got 62708 / 64000 correct (97.98)
+## Top-5 Training ACC: Got 63982 / 64000 correct (99.97)
+## Top-1 Val ACC: Got 7975 / 16000 correct (49.84)
+## Top-5 Val ACC: Got 12532 / 16000 correct (78.33)
 
 python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 10 --option convNext --from_pretrain
