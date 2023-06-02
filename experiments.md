@@ -54,7 +54,20 @@ Training time: ~10 min
  - Top-1 Val ACC: Got 3296 / 16000 correct (20.60)
  - Top-5 Val ACC: Got 7632 / 16000 correct (47.70)
 
-python train.py --use_gpu --batch_size 64 --lr 1e-5 --epochs 3 --option alex
+```python train.py --use_gpu --batch_size 64 --lr 1e-5 --epochs 3 --option alex```
+
+## Experiment 2 - start with pretrained weights then finetune
+
+Training time: 1 min per epoch
+
+- Top-1 Training ACC: Got 30151 / 64000 correct (47.11)
+- Top-5 Training ACC: Got 49277 / 64000 correct (77.00)
+- Top-1 Val ACC: Got 4304 / 16000 correct (26.90)
+- Top-5 Val ACC: Got 9073 / 16000 correct (56.71)
+
+- Overfitting after epoch 8
+
+```python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 10 --option alex```
 
 ---
 

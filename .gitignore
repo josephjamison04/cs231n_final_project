@@ -7,3 +7,4 @@ new_env.yml
 CS231N_Project_Milestone.pdf
 *.pt
 *.pyc
+fc_conv_transformer/logs/*
