@@ -209,3 +209,17 @@ Training time: 6 mins. per epoch
 - Overfitting after 9 epochs 
 
 ```python train.py --use_gpu --batch_size 64 --lr 1e-5 --epochs 10 --option resnet50```
+
+## Experiment 2 - start with pretrained weights then finetune
+
+Training time: 6 mins. per epoch
+
+### At epoch 3:
+- Top-1 Training ACC: Got 56847 / 64000 correct (88.82)
+- Top-5 Training ACC: Got 63024 / 64000 correct (98.47)
+- Top-1 Val ACC: Got 8995 / 16000 correct (56.22)
+- Top-5 Val ACC: Got 13592 / 16000 correct (84.95)
+
+- Overfitting starting epoch 4, early stop
+
+```python train.py --use_gpu --batch_size 64 --lr 5e-5 --epochs 10 --option resnet50```
