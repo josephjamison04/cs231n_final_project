@@ -108,7 +108,7 @@ Training Time ~70 minutes
 
 ```python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 10 --option convNext```
 
-## Experiment 4 - from pretrained weigths, with finetuning
+## Experiment 4 - from pretrained weights, with finetuning
 
 Training Time ~60 minutes
 
