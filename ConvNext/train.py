@@ -340,7 +340,7 @@ if __name__ == "__main__":
     
     seed_everything(args.seed)
     
-    lrs = [1e-4]
+    lrs = [1e-5, 1e-4]
     drop_path_rate = [0.0] # Drop rate for stochastic depth (i.e., randomly drops 
                                 # entire Resblocks during training -> additional regularization)
     for lr in lrs:
