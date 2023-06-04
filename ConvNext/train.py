@@ -244,10 +244,10 @@ def train(args):
          # Append current epoch results to log file
         with open(args.logpath, "a+") as f:
             epoch_str = f"Epoch: {epoch + 1} \n"
-            epoch_str += f"Top-1 Training ACC: {t1_train_epoch_acc} \n"
-            epoch_str += f"Top-5 Training ACC: {t5_train_epoch_acc} \n"
-            epoch_str += f"Top-1 Val ACC: {t1_val_epoch_acc} \n"
-            epoch_str += f"Top-5 Val ACC: {t5_val_epoch_acc} \n"
+            epoch_str += f"Top-1 Training ACC: {100*t1_train_epoch_acc} \n"
+            epoch_str += f"Top-5 Training ACC: {100*t5_train_epoch_acc} \n"
+            epoch_str += f"Top-1 Val ACC: {100*t1_val_epoch_acc} \n"
+            epoch_str += f"Top-5 Val ACC: {100*t5_val_epoch_acc} \n"
             epoch_str += f"Training Loss: {loss.item()} \n"
             epoch_str += "----------------- \n"
             f.write(epoch_str)
