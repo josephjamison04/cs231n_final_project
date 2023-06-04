@@ -393,4 +393,5 @@ if __name__ == "__main__":
     result_path = f"logs/RESULT_FILE-{now2.month}m_{now2.day}d_{now2.hour}h_{now2.minute}m.txt"
     with open(result_path, "a+") as f:
         
-        f.write(f"Best top-1 validation accuracy was {best_t1_val_acc}. \nThis occurred in model {best_model_path}, \nwhich was logged in {best_model_log}")
+        f.write(f"Best top-1 validation accuracy out of {hpo_loops} models was {best_t1_val_acc}. \
+                \nThis occurred in model {best_model_path}, \nwhich was logged in {best_model_log}")
