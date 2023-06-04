@@ -162,7 +162,8 @@ def train(args):
     if args.option == 'convNext':
         
         # Initializing a ConvNext convnext-tiny-224 style configuration
-        configuration = ConvNextConfig(num_labels= 100, image_size= 128, return_dict=False)
+        configuration = ConvNextConfig(num_labels= 100, image_size= 128, return_dict=False, 
+                                       drop_path_rate= args.dpr)
 
         if args.from_pretrain:
             # Initializing a model (with random weights) from the convnext-tiny-224 style configuration
@@ -181,7 +182,8 @@ def train(args):
 
     # Write header of log file
     with open(args.logpath, "a+") as f:
-        result = f"lr: {args.lr} \t batchsize: {args.batch_size} \t epochs: {args.epochs} \t option: {args.option} \n"
+        result = f"lr: {args.lr} \t batchsize: {args.batch_size} \t epochs: {args.epochs} \t option: {args.option}"
+        result = f"drop_path_rate: {args.dpr} \n"
         result += "----------------- \n"
         f.write(result)
 
@@ -332,17 +334,28 @@ def get_args():
     args = parser.parse_args()
     return args
 
+
 if __name__ == "__main__":
     args = get_args()
-    now = datetime.datetime.now()
-    if args.from_pretrain:
-        args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-{args.lr}-cs231n.pt"  # save path
-        args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}-{args.lr}_{now.hour}_{now.minute}_{now.second}.txt"  # save path
-    else:
-        args.filepath = f"{args.option}-{args.epochs}epochs-{args.lr}-cs231n.pt"  # save path
-        args.logpath = f"logs/{args.option}-{args.epochs}-{args.lr}_{now.hour}_{now.minute}_{now.second}.txt"  # save path
-    
     
     seed_everything(args.seed)
-    train(args)
+    
+    lrs = [1e-4]
+    drop_path_rate = [0.0] # Drop rate for stochastic depth (i.e., randomly drops 
+                                # entire Resblocks during training -> additional regularization)
+    for lr in lrs:
+        for dpr in drop_path_rate:
+            now = datetime.datetime.now()
+
+            args.lr = lr
+            args.dpr = dpr
+
+            if args.from_pretrain:
+                args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-{args.lr}-cs231n.pt"  # save path
+                args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}-{args.lr}_{now.hour}_{now.minute}_{now.second}.txt"  # save path
+            else:
+                args.filepath = f"{args.option}-{args.epochs}epochs-{args.lr}-cs231n.pt"  # save path
+                args.logpath = f"logs/{args.option}-{args.epochs}-{args.lr}_{now.hour}_{now.minute}_{now.second}.txt"  # save path
+
+            train(args)
     
