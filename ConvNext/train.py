@@ -163,7 +163,7 @@ def train(args):
         
         # Initializing a ConvNext convnext-tiny-224 style configuration
         configuration = ConvNextConfig(num_labels= 100, image_size= 128, return_dict=False, 
-                                       drop_path_rate= args.dpr)
+                                       drop_path_rate= args.dpr, patch_size= args.patch_size)
 
         if args.from_pretrain:
             # Initializing a model (with random weights) from the convnext-tiny-224 style configuration
@@ -183,7 +183,7 @@ def train(args):
     # Write header of log file
     with open(args.logpath, "a+") as f:
         result = f"lr: {args.lr} \t batchsize: {args.batch_size} \t epochs: {args.epochs} \t option: {args.option}"
-        result += f"drop_path_rate: {args.dpr} \n"
+        result += f"drop_path_rate: {args.dpr} \t patch size: {args.patch_size} \n"
         result += "----------------- \n"
         f.write(result)
 
@@ -347,8 +347,9 @@ if __name__ == "__main__":
     lrs = [1e-5, 1e-4, 1e-3]
     drop_path_rate = [0.0, 0.1] # Drop rate for stochastic depth (i.e., randomly drops 
                                 # entire Resblocks during training -> additional regularization)
+    patch_sizes = [8, 4]
     
-    hpo_loops = len(lrs)*len(drop_path_rate)
+    hpo_loops = len(lrs)*len(drop_path_rate)*len(patch_sizes)
 
     print(f"HPO loop will train {hpo_loops} models for {args.epochs} epochs each.")
     print(f"Logs will be stored in ConvNext/logs folder")
@@ -358,19 +359,21 @@ if __name__ == "__main__":
     hpo_loop_counter = 1
     for lr in lrs:
         for dpr in drop_path_rate:
-            now = datetime.datetime.now()
+            for patch in patch_sizes:
+                now = datetime.datetime.now()
 
-            args.lr = lr
-            args.dpr = dpr
+                args.lr = lr
+                args.dpr = dpr
+                args.patch_size = patch
 
-            print(f"Now training model number {hpo_loop_counter} of {hpo_loops}...")
-            if args.from_pretrain:
-                args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-{args.lr}-cs231n.pt"  # save path
-                args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
-            else:
-                args.filepath = f"{args.option}-{args.epochs}epochs-{args.lr}-cs231n.pt"  # save path
-                args.logpath = f"logs/{args.option}-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
+                print(f"Now training model number {hpo_loop_counter} of {hpo_loops}...")
+                if args.from_pretrain:
+                    args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-dpr_{args.dpr}-patchsize{args.patch_size}.pt"  # save path
+                    args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-patchsize{args.patch_size}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
+                else:
+                    args.filepath = f"{args.option}-{args.epochs}epochs-lr_{args.lr}-dpr_{args.dpr}-patchsize{args.patch_size}.pt"  # save path
+                    args.logpath = f"logs/{args.option}-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-patchsize{args.patch_size}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
 
-            train(args)
-            hpo_loop_counter += 1
+                train(args)
+                hpo_loop_counter += 1
     
