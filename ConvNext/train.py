@@ -343,6 +343,7 @@ if __name__ == "__main__":
     lrs = [1e-5, 1e-4]
     drop_path_rate = [0.0] # Drop rate for stochastic depth (i.e., randomly drops 
                                 # entire Resblocks during training -> additional regularization)
+    print(f"HPO loop will now train {len(lrs)*len(drop_path_rate)} models for {args.epochs} epochs each.")
     for lr in lrs:
         for dpr in drop_path_rate:
             now = datetime.datetime.now()
