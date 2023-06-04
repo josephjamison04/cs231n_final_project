@@ -163,7 +163,7 @@ def train(args):
         
         # Initializing a ConvNext convnext-tiny-224 style configuration
         configuration = ConvNextConfig(num_labels= 100, image_size= 128, return_dict=False, 
-                                       drop_path_rate= args.dpr, patch_size= args.patch_size)
+                                       drop_path_rate= args.dpr, patch_size= args.patch_size, num_stages= args.num_stages)
 
         if args.from_pretrain:
             # Initializing a model (with random weights) from the convnext-tiny-224 style configuration
@@ -183,7 +183,7 @@ def train(args):
     # Write header of log file
     with open(args.logpath, "a+") as f:
         result = f"lr: {args.lr} \t batchsize: {args.batch_size} \t epochs: {args.epochs} \t option: {args.option}"
-        result += f"drop_path_rate: {args.dpr} \t patch size: {args.patch_size} \n"
+        result += f"drop_path_rate: {args.dpr} \t patch size: {args.patch_size} \t num_stages: {args.num_stages}\n"
         result += "----------------- \n"
         f.write(result)
 
@@ -346,12 +346,13 @@ if __name__ == "__main__":
     ####################################################################################
     # Hyperparameter grid search
 
-    lrs = [1e-5, 1e-4]
+    lrs = [1e-4]
     drop_path_rate = [0.0] # Drop rate for stochastic depth (i.e., randomly drops 
                                 # entire Resblocks during training -> additional regularization)
-    patch_sizes = [8] # ADD 4 BACK
+    patch_sizes = [8, 4] 
+    stages = [3]
     
-    hpo_loops = len(lrs)*len(drop_path_rate)*len(patch_sizes)
+    hpo_loops = len(lrs)*len(drop_path_rate)*len(patch_sizes)*len(stages)
 
     print(f"HPO loop will train {hpo_loops} models for {args.epochs} epochs each.")
     print(f"Logs will be stored in ConvNext/logs folder")
@@ -363,30 +364,33 @@ if __name__ == "__main__":
     for lr in lrs:
         for dpr in drop_path_rate:
             for patch in patch_sizes:
-                now = datetime.datetime.now()
+                for ns in stages:
+                    now = datetime.datetime.now()
 
-                args.lr = lr
-                args.dpr = dpr
-                args.patch_size = patch
+                    args.lr = lr
+                    args.dpr = dpr
+                    args.patch_size = patch
+                    args.num_stages = ns
 
-                print(f"Now training model number {hpo_loop_counter} of {hpo_loops}...")
-                if args.from_pretrain:
-                    args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-dpr_{args.dpr}-patchsize{args.patch_size}.pt"  # save path
-                    args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-patchsize{args.patch_size}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
-                else:
-                    args.filepath = f"{args.option}-{args.epochs}epochs-lr_{args.lr}-dpr_{args.dpr}-patchsize{args.patch_size}.pt"  # save path
-                    args.logpath = f"logs/{args.option}-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-patchsize{args.patch_size}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
+                    print(f"Now training model number {hpo_loop_counter} of {hpo_loops}...")
+                    if args.from_pretrain:
+                        args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-dpr_{args.dpr}-patch{args.patch_size}-{args.num_stages}stages.pt"  # save path
+                        args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-patch{args.patch_size}-{args.num_stages}stages-{now.hour}_{now.minute}_{now.second}.txt"  # save path
+                    else:
+                        args.filepath = f"{args.option}-{args.epochs}epochs-lr_{args.lr}-dpr_{args.dpr}-patch{args.patch_size}-{args.num_stages}stages.pt"  # save path
+                        args.logpath = f"logs/{args.option}-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-patch{args.patch_size}-{args.num_stages}stages-{now.hour}_{now.minute}_{now.second}.txt"  # save path
 
-                t1_val_acc = train(args)
-                hpo_loop_counter += 1
+                    t1_val_acc = train(args)
+                    hpo_loop_counter += 1
 
-                if t1_val_acc > best_t1_val_acc:
-                    best_model_path = args.filepath
-                    best_model_log = args.logpath
+                    if t1_val_acc > best_t1_val_acc:
+                        best_model_path = args.filepath
+                        best_model_log = args.logpath
+                        best_t1_val_acc = t1_val_acc
                 
     # Write results file
     now2 = datetime.datetime.now()
     result_path = f"logs/RESULT_FILE-{now2.month}m_{now2.day}d_{now2.hour}h_{now2.minute}m.txt"
     with open(result_path, "a+") as f:
         
-        f.write(f"Best top-1 validation accuracy occurred in model {best_model_path}, which was logged at {best_model_log}")
+        f.write(f"Best top-1 validation accuracy was {best_t1_val_acc}. \nThis occurred in model {best_model_path}, \nwhich was logged in {best_model_log}")
