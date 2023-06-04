@@ -6,4 +6,4 @@ python train.py --use_gpu --batch_size 64 --epochs 1 --option convNext --from_pr
 
 echo "WARNING! SYSTEM WILL SHUTDOWN IN 60 SECONDS UNLESS CTRL-C INTERRUPT..."
 sleep 60
-sudo shutdown now
+# sudo shutdown now
