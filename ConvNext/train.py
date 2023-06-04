@@ -42,7 +42,7 @@ def load_data(args,train =True,valid = True,test = False):
             X_train = X_train[:10000,:]
             y_train = y_train[:10000]
         if args.reshape:
-            print(X_train.shape)
+            # print(X_train.shape)
             X_train = X_train.reshape(-1, 3, 128, 128)
         print('Training data shape: ', X_train.shape)
         print('Training labels shape: ', y_train.shape)
@@ -183,7 +183,7 @@ def train(args):
     # Write header of log file
     with open(args.logpath, "a+") as f:
         result = f"lr: {args.lr} \t batchsize: {args.batch_size} \t epochs: {args.epochs} \t option: {args.option}"
-        result = f"drop_path_rate: {args.dpr} \n"
+        result += f"drop_path_rate: {args.dpr} \n"
         result += "----------------- \n"
         f.write(result)
 
@@ -239,7 +239,7 @@ def train(args):
         print('Top-5 Training ACC: Got %d / %d correct (%.2f)' % (t5_train_num_correct, train_num_samples, 100 * t5_train_epoch_acc))
         print('Top-1 Val ACC: Got %d / %d correct (%.2f)' % (t1_val_num_correct, val_num_samples, 100 * t1_val_epoch_acc))
         print('Top-5 Val ACC: Got %d / %d correct (%.2f)' % (t5_val_num_correct, val_num_samples, 100 * t5_val_epoch_acc))
-        print('-'*100)
+        
 
          # Append current epoch results to log file
         with open(args.logpath, "a+") as f:
@@ -252,7 +252,8 @@ def train(args):
             epoch_str += "----------------- \n"
             f.write(epoch_str)
             print(f"Write results to {args.logpath}")
-        
+        print('-'*100)
+
         t1_train_accs.append(t1_train_epoch_acc)
         t5_train_accs.append(t5_train_epoch_acc)
         t1_val_accs.append(t1_val_epoch_acc)
@@ -340,10 +341,15 @@ if __name__ == "__main__":
     
     seed_everything(args.seed)
     
-    lrs = [1e-5, 1e-4]
-    drop_path_rate = [0.0] # Drop rate for stochastic depth (i.e., randomly drops 
+    ####################################################################################
+    # Hyperparameter grid search
+
+    lrs = [1e-5, 1e-4, 1e-3]
+    drop_path_rate = [0.0, 0.1] # Drop rate for stochastic depth (i.e., randomly drops 
                                 # entire Resblocks during training -> additional regularization)
     print(f"HPO loop will now train {len(lrs)*len(drop_path_rate)} models for {args.epochs} epochs each.")
+    ####################################################################################
+
     for lr in lrs:
         for dpr in drop_path_rate:
             now = datetime.datetime.now()
@@ -353,10 +359,12 @@ if __name__ == "__main__":
 
             if args.from_pretrain:
                 args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-{args.lr}-cs231n.pt"  # save path
-                args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}-{args.lr}_{now.hour}_{now.minute}_{now.second}.txt"  # save path
+                args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}_ \
+                        -dpr_{args.dpr}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
             else:
                 args.filepath = f"{args.option}-{args.epochs}epochs-{args.lr}-cs231n.pt"  # save path
-                args.logpath = f"logs/{args.option}-{args.epochs}-{args.lr}_{now.hour}_{now.minute}_{now.second}.txt"  # save path
+                args.logpath = f"logs/{args.option}-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}- \
+                        {now.hour}_{now.minute}_{now.second}.txt"  # save path
 
             train(args)
     
