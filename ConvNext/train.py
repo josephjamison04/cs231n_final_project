@@ -260,7 +260,7 @@ def train(args):
         t5_val_accs.append(t5_val_epoch_acc)
         train_loss.append(loss.item())
     
-    return t1_val_epoch_acc
+    return max_val_acc
 
 def check_accuracy(loader, model, print_acc=False):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -349,8 +349,8 @@ if __name__ == "__main__":
     lrs = [1e-5, 1e-4, 1e-3]
     drop_path_rate = [0.0, 0.15] # Drop rate for stochastic depth (i.e., randomly drops 
                                 # entire Resblocks during training -> additional regularization)
-    patch_sizes = [4, 8]    
-    stages = [4, 3]
+    patch_sizes = [4, 8]    # patch size to use in the patch embedding layer (emulates transformers)
+    stages = [4, 3]         # number of stages in the model
     
     hpo_loops = len(lrs)*len(drop_path_rate)*len(patch_sizes)*len(stages)
 
