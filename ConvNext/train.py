@@ -348,6 +348,7 @@ if __name__ == "__main__":
     drop_path_rate = [0.0, 0.1] # Drop rate for stochastic depth (i.e., randomly drops 
                                 # entire Resblocks during training -> additional regularization)
     print(f"HPO loop will now train {len(lrs)*len(drop_path_rate)} models for {args.epochs} epochs each.")
+    print(f"Logs will be stored in ConvNext/logs folder")
     ####################################################################################
 
     for lr in lrs:
