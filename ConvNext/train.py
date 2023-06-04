@@ -347,10 +347,15 @@ if __name__ == "__main__":
     lrs = [1e-5, 1e-4, 1e-3]
     drop_path_rate = [0.0, 0.1] # Drop rate for stochastic depth (i.e., randomly drops 
                                 # entire Resblocks during training -> additional regularization)
-    print(f"HPO loop will now train {len(lrs)*len(drop_path_rate)} models for {args.epochs} epochs each.")
+    
+    hpo_loops = len(lrs)*len(drop_path_rate)
+
+    print(f"HPO loop will train {hpo_loops} models for {args.epochs} epochs each.")
     print(f"Logs will be stored in ConvNext/logs folder")
+    print('-'*100)
     ####################################################################################
 
+    hpo_loop_counter = 1
     for lr in lrs:
         for dpr in drop_path_rate:
             now = datetime.datetime.now()
@@ -358,14 +363,14 @@ if __name__ == "__main__":
             args.lr = lr
             args.dpr = dpr
 
+            print(f"Now training model number {hpo_loop_counter} of {hpo_loops}...")
             if args.from_pretrain:
                 args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-{args.lr}-cs231n.pt"  # save path
-                args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}_ \
-                        -dpr_{args.dpr}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
+                args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
             else:
                 args.filepath = f"{args.option}-{args.epochs}epochs-{args.lr}-cs231n.pt"  # save path
-                args.logpath = f"logs/{args.option}-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}- \
-                        {now.hour}_{now.minute}_{now.second}.txt"  # save path
+                args.logpath = f"logs/{args.option}-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
 
             train(args)
+            hpo_loop_counter += 1
     
