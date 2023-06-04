@@ -1,4 +1,4 @@
-echo "Beginning training script..."
+echo "Beginning HPO training script with hyperparamters specified in train.py..."
 
 
 python train.py --use_gpu --batch_size 64 --epochs 1 --option convNext --from_pretrain --small_data
