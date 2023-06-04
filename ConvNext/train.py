@@ -166,8 +166,8 @@ def train(args):
                                        drop_path_rate= args.dpr, patch_size= args.patch_size, num_stages= args.num_stages)
 
         if args.from_pretrain:
-            # Initializing a model (with pretrained weights) from the convnext-tiny-224 style configuration
-            model = ConvNextForImageClassification(configuration).from_pretrained("facebook/convnext-tiny-224")
+            # Initializing a model (with pretrained weights and defined config) from the convnext-tiny-224 style configuration
+            model = ConvNextForImageClassification.from_pretrained("facebook/convnext-tiny-224")
         else:
             # Initialize with random weights
             model = ConvNextForImageClassification(configuration) 
