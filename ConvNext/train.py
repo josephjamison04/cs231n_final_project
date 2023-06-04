@@ -163,7 +163,8 @@ def train(args):
         
         # Initializing a ConvNext convnext-tiny-224 style configuration
         configuration = ConvNextConfig(num_labels= 100, image_size= 128, return_dict=False, 
-                                       drop_path_rate= args.dpr, patch_size= args.patch_size, num_stages= args.num_stages)
+                                       drop_path_rate= args.dpr, patch_size= args.patch_size, num_stages= args.num_stages,
+                                       hidden_sizes= args.hidden_sizes)
 
         if args.from_pretrain:
             # Initializing a model (with pretrained weights and defined config) from the convnext-tiny-224 style configuration
@@ -347,10 +348,10 @@ if __name__ == "__main__":
     # Hyperparameter grid search
 
     lrs = [1e-4]
-    drop_path_rate = [0.15, 0.0] # Drop rate for stochastic depth (i.e., randomly drops 
+    drop_path_rate = [0.15] # Drop rate for stochastic depth (i.e., randomly drops 
                                 # entire Resblocks during training -> additional regularization)
-    patch_sizes = [8, 4]    # patch size to use in the patch embedding layer (emulates transformers)
-    stages = [4]         # number of stages in the model
+    patch_sizes = [4]    # patch size to use in the patch embedding layer (emulates transformers)
+    stages = [3, 4]         # number of stages in the model
     
     hpo_loops = len(lrs)*len(drop_path_rate)*len(patch_sizes)*len(stages)
 
@@ -371,6 +372,8 @@ if __name__ == "__main__":
                     args.dpr = dpr
                     args.patch_size = patch
                     args.num_stages = ns
+                    args.hidden_sizes = [96, 192, 384] if ns == 3 else [96, 192, 384, 768]
+                        
 
                     print(f"Now training model number {hpo_loop_counter} of {hpo_loops}...")
                     if args.from_pretrain:
