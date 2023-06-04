@@ -387,8 +387,6 @@ if __name__ == "__main__":
     # Write results file
     now2 = datetime.datetime.now()
     result_path = f"logs/RESULT_FILE-{now2.month}m_{now2.day}d_{now2.hour}h_{now2.minute}m.txt"
-    with open(args.logpath, "a+") as f:
-        result = f"lr: {args.lr} \t batchsize: {args.batch_size} \t epochs: {args.epochs} \t option: {args.option}"
-        result += f"drop_path_rate: {args.dpr} \t patch size: {args.patch_size} \n"
-        result += "----------------- \n"
-        f.write(result)
+    with open(result_path, "a+") as f:
+        
+        f.write(f"Best top-1 validation accuracy occurred in model {best_model_path}, which was logged at {best_model_log}")
