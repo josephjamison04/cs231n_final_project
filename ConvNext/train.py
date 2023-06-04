@@ -259,6 +259,8 @@ def train(args):
         t1_val_accs.append(t1_val_epoch_acc)
         t5_val_accs.append(t5_val_epoch_acc)
         train_loss.append(loss.item())
+    
+    return t1_val_epoch_acc
 
 def check_accuracy(loader, model, print_acc=False):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -357,6 +359,7 @@ if __name__ == "__main__":
     ####################################################################################
 
     hpo_loop_counter = 1
+    best_t1_val_acc = -1.0
     for lr in lrs:
         for dpr in drop_path_rate:
             for patch in patch_sizes:
@@ -374,6 +377,18 @@ if __name__ == "__main__":
                     args.filepath = f"{args.option}-{args.epochs}epochs-lr_{args.lr}-dpr_{args.dpr}-patchsize{args.patch_size}.pt"  # save path
                     args.logpath = f"logs/{args.option}-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-patchsize{args.patch_size}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
 
-                train(args)
+                t1_val_acc = train(args)
                 hpo_loop_counter += 1
-    
+
+                if t1_val_acc > best_t1_val_acc:
+                    best_model_path = args.filepath
+                    best_model_log = args.logpath
+                
+    # Write results file
+    now2 = datetime.datetime.now()
+    result_path = f"logs/RESULT_FILE-{now2.month}m_{now2.day}d_{now2.hour}h_{now2.minute}m.txt"
+    with open(args.logpath, "a+") as f:
+        result = f"lr: {args.lr} \t batchsize: {args.batch_size} \t epochs: {args.epochs} \t option: {args.option}"
+        result += f"drop_path_rate: {args.dpr} \t patch size: {args.patch_size} \n"
+        result += "----------------- \n"
+        f.write(result)
