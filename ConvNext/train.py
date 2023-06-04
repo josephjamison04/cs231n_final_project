@@ -166,8 +166,8 @@ def train(args):
                                        drop_path_rate= args.dpr, patch_size= args.patch_size, num_stages= args.num_stages)
 
         if args.from_pretrain:
-            # Initializing a model (with random weights) from the convnext-tiny-224 style configuration
-            model = ConvNextForImageClassification.from_pretrained("facebook/convnext-tiny-224")
+            # Initializing a model (with pretrained weights) from the convnext-tiny-224 style configuration
+            model = ConvNextForImageClassification(configuration).from_pretrained("facebook/convnext-tiny-224")
         else:
             # Initialize with random weights
             model = ConvNextForImageClassification(configuration) 
@@ -347,10 +347,10 @@ if __name__ == "__main__":
     # Hyperparameter grid search
 
     lrs = [1e-4, 1e-3]
-    drop_path_rate = [0.0, 0.15] # Drop rate for stochastic depth (i.e., randomly drops 
+    drop_path_rate = [0.15] # Drop rate for stochastic depth (i.e., randomly drops 
                                 # entire Resblocks during training -> additional regularization)
-    patch_sizes = [4, 8]    # patch size to use in the patch embedding layer (emulates transformers)
-    stages = [4, 3]         # number of stages in the model
+    patch_sizes = [8, 4]    # patch size to use in the patch embedding layer (emulates transformers)
+    stages = [3]         # number of stages in the model
     
     hpo_loops = len(lrs)*len(drop_path_rate)*len(patch_sizes)*len(stages)
 
