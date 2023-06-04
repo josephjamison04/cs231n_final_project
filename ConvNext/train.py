@@ -346,11 +346,11 @@ if __name__ == "__main__":
     ####################################################################################
     # Hyperparameter grid search
 
-    lrs = [1e-4]
-    drop_path_rate = [0.0] # Drop rate for stochastic depth (i.e., randomly drops 
+    lrs = [1e-5, 1e-4, 1e-3]
+    drop_path_rate = [0.0, 0.15] # Drop rate for stochastic depth (i.e., randomly drops 
                                 # entire Resblocks during training -> additional regularization)
-    patch_sizes = [8, 4] 
-    stages = [3]
+    patch_sizes = [4, 8]    
+    stages = [4, 3]
     
     hpo_loops = len(lrs)*len(drop_path_rate)*len(patch_sizes)*len(stages)
 
