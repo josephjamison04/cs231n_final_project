@@ -347,7 +347,7 @@ if __name__ == "__main__":
     ####################################################################################
     # Hyperparameter grid search
 
-    lrs = [3e-5, 7e-5, 3e-4, 7e-4]
+    lrs = [5e-5, 1e-4, 5e-4]
     drop_path_rate = [0.0] # Drop rate for stochastic depth (i.e., randomly drops 
                                 # entire Resblocks during training -> additional regularization)
     patch_sizes = [4]    # patch size to use in the patch embedding layer (emulates transformers)
