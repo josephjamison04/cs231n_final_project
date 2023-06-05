@@ -184,7 +184,7 @@ def train(args):
     # Write header of log file
     with open(args.logpath, "a+") as f:
         result = f"lr: {args.lr} \t batchsize: {args.batch_size} \t epochs: {args.epochs} \t option: {args.option}"
-        result += f"drop_path_rate: {args.dpr} \t patch size: {args.patch_size} \t num_stages: {args.num_stages}\n"
+        result += f"\tdrop_path_rate: {args.dpr} \t patch size: {args.patch_size} \t num_stages: {args.num_stages}\n"
         result += "----------------- \n"
         f.write(result)
 
@@ -347,11 +347,11 @@ if __name__ == "__main__":
     ####################################################################################
     # Hyperparameter grid search
 
-    lrs = [1e-5, 1e-4]
-    drop_path_rate = [0.2, 0.0] # Drop rate for stochastic depth (i.e., randomly drops 
+    lrs = [3e-5, 7e-5, 3e-4, 7e-4]
+    drop_path_rate = [0.0] # Drop rate for stochastic depth (i.e., randomly drops 
                                 # entire Resblocks during training -> additional regularization)
     patch_sizes = [4]    # patch size to use in the patch embedding layer (emulates transformers)
-    stages = [3, 4]         # number of stages in the model
+    stages = [4]         # number of stages in the model
     
     hpo_loops = len(lrs)*len(drop_path_rate)*len(patch_sizes)*len(stages)
 
