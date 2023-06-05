@@ -377,8 +377,8 @@ if __name__ == "__main__":
 
                     print(f"Now training model number {hpo_loop_counter} of {hpo_loops}...")
                     if args.from_pretrain:
-                        args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-dpr_{args.dpr}-patch{args.patch_size}-{args.num_stages}stages.pt"  # save path
-                        args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-patch{args.patch_size}-{args.num_stages}stages-{now.hour}_{now.minute}_{now.second}.txt"  # save path
+                        args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-batchsize{args.batch_size}.pt"  # save path
+                        args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-batchsize{args.batch_size}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
                     else:
                         args.filepath = f"{args.option}-{args.epochs}epochs-lr_{args.lr}-dpr_{args.dpr}-patch{args.patch_size}-{args.num_stages}stages.pt"  # save path
                         args.logpath = f"logs/{args.option}-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-patch{args.patch_size}-{args.num_stages}stages-{now.hour}_{now.minute}_{now.second}.txt"  # save path
@@ -396,5 +396,5 @@ if __name__ == "__main__":
     result_path = f"logs/RESULT_FILE-{now2.month}m_{now2.day}d_{now2.hour}h_{now2.minute}m.txt"
     with open(result_path, "a+") as f:
         
-        f.write(f"Best top-1 validation accuracy out of {hpo_loops} models was {best_t1_val_acc}. \
+        f.write(f"Best top-1 validation accuracy out of {hpo_loops} models was {100* best_t1_val_acc}. \
                 \nThis occurred in model {best_model_path}, \nwhich was logged in {best_model_log}")
