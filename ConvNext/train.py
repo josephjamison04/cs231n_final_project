@@ -183,7 +183,7 @@ def train(args):
 
     # Write header of log file
     with open(args.logpath, "a+") as f:
-        result = f"lr: {args.lr} \t batchsize: {args.batch_size} \t epochs: {args.epochs} \t option: {args.option}"
+        result = f"lr: {args.lr} \t batchsize: {args.batch_size} \t epochs: {args.epochs} \t option: {args.option}\n"
         result += f"\tdrop_path_rate: {args.dpr} \t patch size: {args.patch_size} \t num_stages: {args.num_stages}\n"
         result += f"weight decay(L2 reg): {args.weight_decay}\n"
         result += "----------------- \n"
