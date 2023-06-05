@@ -355,7 +355,7 @@ if __name__ == "__main__":
     stages = [4]         # number of stages in the model
     weight_decay_factors = [1e-4, 1e-3, 0.0]
     
-    hpo_loops = len(lrs)*len(drop_path_rate)*len(patch_sizes)*len(stages)
+    hpo_loops = len(lrs)*len(drop_path_rate)*len(patch_sizes)*len(stages)*len(weight_decay_factors)
 
     print(f"HPO loop will train {hpo_loops} models for {args.epochs} epochs each.")
     print(f"Logs will be stored in ConvNext/logs folder")
