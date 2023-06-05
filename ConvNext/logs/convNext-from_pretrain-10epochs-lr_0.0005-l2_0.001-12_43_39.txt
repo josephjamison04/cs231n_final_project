@@ -1,0 +1,73 @@
+lr: 0.0005 	 batchsize: 64 	 epochs: 10 	 option: convNext	drop_path_rate: 0.0 	 patch size: 4 	 num_stages: 4
+	weight decay(L2 reg): 0.001
+----------------- 
+Epoch: 1 
+Top-1 Training ACC: 62.689062500000006 
+Top-5 Training ACC: 88.271875 
+Top-1 Val ACC: 51.106249999999996 
+Top-5 Val ACC: 80.9125 
+Training Loss: 0.030066732317209244 
+----------------- 
+Epoch: 2 
+Top-1 Training ACC: 77.8125 
+Top-5 Training ACC: 95.8171875 
+Top-1 Val ACC: 50.9875 
+Top-5 Val ACC: 80.6125 
+Training Loss: 0.012180494144558907 
+----------------- 
+Epoch: 3 
+Top-1 Training ACC: 85.7921875 
+Top-5 Training ACC: 98.60624999999999 
+Top-1 Val ACC: 48.993750000000006 
+Top-5 Val ACC: 78.63125 
+Training Loss: 0.010029314085841179 
+----------------- 
+Epoch: 4 
+Top-1 Training ACC: 90.415625 
+Top-5 Training ACC: 99.4921875 
+Top-1 Val ACC: 50.1375 
+Top-5 Val ACC: 78.86875 
+Training Loss: 0.0034515419974923134 
+----------------- 
+Epoch: 5 
+Top-1 Training ACC: 93.0734375 
+Top-5 Training ACC: 99.7015625 
+Top-1 Val ACC: 50.262499999999996 
+Top-5 Val ACC: 78.78125 
+Training Loss: 0.001697893370874226 
+----------------- 
+Epoch: 6 
+Top-1 Training ACC: 94.0703125 
+Top-5 Training ACC: 99.728125 
+Top-1 Val ACC: 50.006249999999994 
+Top-5 Val ACC: 78.225 
+Training Loss: 0.00269313994795084 
+----------------- 
+Epoch: 7 
+Top-1 Training ACC: 94.6890625 
+Top-5 Training ACC: 99.78125 
+Top-1 Val ACC: 49.793749999999996 
+Top-5 Val ACC: 78.34375 
+Training Loss: 0.0014967339811846614 
+----------------- 
+Epoch: 8 
+Top-1 Training ACC: 95.159375 
+Top-5 Training ACC: 99.86406249999999 
+Top-1 Val ACC: 50.01875 
+Top-5 Val ACC: 78.14999999999999 
+Training Loss: 0.0015750088496133685 
+----------------- 
+Epoch: 9 
+Top-1 Training ACC: 96.42031250000001 
+Top-5 Training ACC: 99.9015625 
+Top-1 Val ACC: 50.475 
+Top-5 Val ACC: 77.85 
+Training Loss: 0.0009147060918621719 
+----------------- 
+Epoch: 10 
+Top-1 Training ACC: 96.3328125 
+Top-5 Training ACC: 99.9015625 
+Top-1 Val ACC: 50.075 
+Top-5 Val ACC: 78.11875 
+Training Loss: 0.0028734891675412655 
+----------------- 

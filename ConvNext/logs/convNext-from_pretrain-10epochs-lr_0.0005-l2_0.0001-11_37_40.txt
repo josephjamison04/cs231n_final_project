@@ -1,0 +1,73 @@
+lr: 0.0005 	 batchsize: 64 	 epochs: 10 	 option: convNext	drop_path_rate: 0.0 	 patch size: 4 	 num_stages: 4
+	weight decay(L2 reg): 0.0001
+----------------- 
+Epoch: 1 
+Top-1 Training ACC: 62.5390625 
+Top-5 Training ACC: 88.1609375 
+Top-1 Val ACC: 51.025 
+Top-5 Val ACC: 80.875 
+Training Loss: 0.030971616506576538 
+----------------- 
+Epoch: 2 
+Top-1 Training ACC: 78.246875 
+Top-5 Training ACC: 96.1234375 
+Top-1 Val ACC: 51.125 
+Top-5 Val ACC: 80.85625 
+Training Loss: 0.012816669419407845 
+----------------- 
+Epoch: 3 
+Top-1 Training ACC: 85.346875 
+Top-5 Training ACC: 98.48281250000001 
+Top-1 Val ACC: 48.956250000000004 
+Top-5 Val ACC: 78.20625 
+Training Loss: 0.006481170654296875 
+----------------- 
+Epoch: 4 
+Top-1 Training ACC: 90.91875 
+Top-5 Training ACC: 99.5078125 
+Top-1 Val ACC: 50.112500000000004 
+Top-5 Val ACC: 79.03125 
+Training Loss: 0.003683390561491251 
+----------------- 
+Epoch: 5 
+Top-1 Training ACC: 93.20937500000001 
+Top-5 Training ACC: 99.7375 
+Top-1 Val ACC: 49.9375 
+Top-5 Val ACC: 78.46875 
+Training Loss: 0.004656622651964426 
+----------------- 
+Epoch: 6 
+Top-1 Training ACC: 94.496875 
+Top-5 Training ACC: 99.82656250000001 
+Top-1 Val ACC: 50.125 
+Top-5 Val ACC: 78.45 
+Training Loss: 0.003399122506380081 
+----------------- 
+Epoch: 7 
+Top-1 Training ACC: 94.234375 
+Top-5 Training ACC: 99.821875 
+Top-1 Val ACC: 49.36875 
+Top-5 Val ACC: 77.6375 
+Training Loss: 0.0017574216471984982 
+----------------- 
+Epoch: 8 
+Top-1 Training ACC: 95.409375 
+Top-5 Training ACC: 99.8453125 
+Top-1 Val ACC: 50.3375 
+Top-5 Val ACC: 77.725 
+Training Loss: 0.0025835009291768074 
+----------------- 
+Epoch: 9 
+Top-1 Training ACC: 94.6296875 
+Top-5 Training ACC: 99.82656250000001 
+Top-1 Val ACC: 49.11875 
+Top-5 Val ACC: 77.35 
+Training Loss: 0.001172896707430482 
+----------------- 
+Epoch: 10 
+Top-1 Training ACC: 96.090625 
+Top-5 Training ACC: 99.89218749999999 
+Top-1 Val ACC: 49.5625 
+Top-5 Val ACC: 77.5 
+Training Loss: 0.0012629448901861906 
+----------------- 

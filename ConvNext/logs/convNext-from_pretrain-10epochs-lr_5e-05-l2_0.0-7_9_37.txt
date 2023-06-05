@@ -1,0 +1,73 @@
+lr: 5e-05 	 batchsize: 64 	 epochs: 10 	 option: convNext	drop_path_rate: 0.0 	 patch size: 4 	 num_stages: 4
+	weight decay(L2 reg): 0.0
+----------------- 
+Epoch: 1 
+Top-1 Training ACC: 37.182812500000004 
+Top-5 Training ACC: 68.5921875 
+Top-1 Val ACC: 34.40625 
+Top-5 Val ACC: 65.325 
+Training Loss: 0.04183333367109299 
+----------------- 
+Epoch: 2 
+Top-1 Training ACC: 52.83125 
+Top-5 Training ACC: 82.03125 
+Top-1 Val ACC: 44.78125 
+Top-5 Val ACC: 75.4625 
+Training Loss: 0.03144768252968788 
+----------------- 
+Epoch: 3 
+Top-1 Training ACC: 63.459374999999994 
+Top-5 Training ACC: 88.6765625 
+Top-1 Val ACC: 49.1 
+Top-5 Val ACC: 78.86875 
+Training Loss: 0.023791002109646797 
+----------------- 
+Epoch: 4 
+Top-1 Training ACC: 72.48281250000001 
+Top-5 Training ACC: 93.1578125 
+Top-1 Val ACC: 49.8625 
+Top-5 Val ACC: 79.85 
+Training Loss: 0.01712029054760933 
+----------------- 
+Epoch: 5 
+Top-1 Training ACC: 80.621875 
+Top-5 Training ACC: 96.3546875 
+Top-1 Val ACC: 49.162499999999994 
+Top-5 Val ACC: 79.54375 
+Training Loss: 0.011229781433939934 
+----------------- 
+Epoch: 6 
+Top-1 Training ACC: 86.8390625 
+Top-5 Training ACC: 98.38906250000001 
+Top-1 Val ACC: 48.25625 
+Top-5 Val ACC: 78.35 
+Training Loss: 0.0059456853196024895 
+----------------- 
+Epoch: 7 
+Top-1 Training ACC: 88.64687500000001 
+Top-5 Training ACC: 99.20625 
+Top-1 Val ACC: 46.71875 
+Top-5 Val ACC: 76.14375 
+Training Loss: 0.003977309446781874 
+----------------- 
+Epoch: 8 
+Top-1 Training ACC: 94.4296875 
+Top-5 Training ACC: 99.8484375 
+Top-1 Val ACC: 47.143750000000004 
+Top-5 Val ACC: 76.7625 
+Training Loss: 0.0019280501874163747 
+----------------- 
+Epoch: 9 
+Top-1 Training ACC: 96.6328125 
+Top-5 Training ACC: 99.953125 
+Top-1 Val ACC: 46.800000000000004 
+Top-5 Val ACC: 76.41875 
+Training Loss: 0.0016588110011070967 
+----------------- 
+Epoch: 10 
+Top-1 Training ACC: 98.2921875 
+Top-5 Training ACC: 99.9875 
+Top-1 Val ACC: 47.475 
+Top-5 Val ACC: 76.85625 
+Training Loss: 0.0003888496430590749 
+----------------- 

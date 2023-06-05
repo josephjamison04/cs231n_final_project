@@ -1,0 +1,73 @@
+lr: 0.0001 	 batchsize: 64 	 epochs: 10 	 option: convNext	drop_path_rate: 0.0 	 patch size: 4 	 num_stages: 4
+	weight decay(L2 reg): 0.0001
+----------------- 
+Epoch: 1 
+Top-1 Training ACC: 48.7671875 
+Top-5 Training ACC: 79.3140625 
+Top-1 Val ACC: 42.9875 
+Top-5 Val ACC: 74.2375 
+Training Loss: 0.0376134067773819 
+----------------- 
+Epoch: 2 
+Top-1 Training ACC: 66.18906249999999 
+Top-5 Training ACC: 90.1328125 
+Top-1 Val ACC: 50.58125 
+Top-5 Val ACC: 80.625 
+Training Loss: 0.02264047972857952 
+----------------- 
+Epoch: 3 
+Top-1 Training ACC: 79.09375 
+Top-5 Training ACC: 96.0359375 
+Top-1 Val ACC: 51.41250000000001 
+Top-5 Val ACC: 81.16875 
+Training Loss: 0.01068445947021246 
+----------------- 
+Epoch: 4 
+Top-1 Training ACC: 89.5703125 
+Top-5 Training ACC: 99.0609375 
+Top-1 Val ACC: 50.625 
+Top-5 Val ACC: 80.26875 
+Training Loss: 0.004630435258150101 
+----------------- 
+Epoch: 5 
+Top-1 Training ACC: 94.65 
+Top-5 Training ACC: 99.8375 
+Top-1 Val ACC: 49.925000000000004 
+Top-5 Val ACC: 79.55 
+Training Loss: 0.0017960931872949004 
+----------------- 
+Epoch: 6 
+Top-1 Training ACC: 96.81562500000001 
+Top-5 Training ACC: 99.96875 
+Top-1 Val ACC: 50.14375 
+Top-5 Val ACC: 79.27499999999999 
+Training Loss: 0.001029919134452939 
+----------------- 
+Epoch: 7 
+Top-1 Training ACC: 97.5546875 
+Top-5 Training ACC: 99.9703125 
+Top-1 Val ACC: 50.0875 
+Top-5 Val ACC: 78.41875 
+Training Loss: 0.0002477127418387681 
+----------------- 
+Epoch: 8 
+Top-1 Training ACC: 97.4703125 
+Top-5 Training ACC: 99.9609375 
+Top-1 Val ACC: 50.075 
+Top-5 Val ACC: 78.375 
+Training Loss: 0.0003451968659646809 
+----------------- 
+Epoch: 9 
+Top-1 Training ACC: 97.446875 
+Top-5 Training ACC: 99.95156250000001 
+Top-1 Val ACC: 49.66875 
+Top-5 Val ACC: 77.94375 
+Training Loss: 0.0004196724621579051 
+----------------- 
+Epoch: 10 
+Top-1 Training ACC: 98.075 
+Top-5 Training ACC: 99.97343749999999 
+Top-1 Val ACC: 50.18125 
+Top-5 Val ACC: 78.05625 
+Training Loss: 0.00012128293747082353 
+----------------- 

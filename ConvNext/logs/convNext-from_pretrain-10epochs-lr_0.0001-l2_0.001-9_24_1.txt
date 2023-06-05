@@ -1,0 +1,73 @@
+lr: 0.0001 	 batchsize: 64 	 epochs: 10 	 option: convNext	drop_path_rate: 0.0 	 patch size: 4 	 num_stages: 4
+	weight decay(L2 reg): 0.001
+----------------- 
+Epoch: 1 
+Top-1 Training ACC: 48.75625 
+Top-5 Training ACC: 79.315625 
+Top-1 Val ACC: 42.975 
+Top-5 Val ACC: 74.24374999999999 
+Training Loss: 0.03761245310306549 
+----------------- 
+Epoch: 2 
+Top-1 Training ACC: 66.19375 
+Top-5 Training ACC: 90.134375 
+Top-1 Val ACC: 50.606249999999996 
+Top-5 Val ACC: 80.63749999999999 
+Training Loss: 0.022642403841018677 
+----------------- 
+Epoch: 3 
+Top-1 Training ACC: 79.084375 
+Top-5 Training ACC: 96.03125 
+Top-1 Val ACC: 51.425 
+Top-5 Val ACC: 81.175 
+Training Loss: 0.010686472989618778 
+----------------- 
+Epoch: 4 
+Top-1 Training ACC: 89.55625 
+Top-5 Training ACC: 99.0640625 
+Top-1 Val ACC: 50.6375 
+Top-5 Val ACC: 80.27499999999999 
+Training Loss: 0.004631362855434418 
+----------------- 
+Epoch: 5 
+Top-1 Training ACC: 94.646875 
+Top-5 Training ACC: 99.834375 
+Top-1 Val ACC: 49.943749999999994 
+Top-5 Val ACC: 79.56875 
+Training Loss: 0.0017937339143827558 
+----------------- 
+Epoch: 6 
+Top-1 Training ACC: 96.7828125 
+Top-5 Training ACC: 99.9671875 
+Top-1 Val ACC: 50.068749999999994 
+Top-5 Val ACC: 79.25625 
+Training Loss: 0.0009845462627708912 
+----------------- 
+Epoch: 7 
+Top-1 Training ACC: 97.6140625 
+Top-5 Training ACC: 99.97343749999999 
+Top-1 Val ACC: 50.15625 
+Top-5 Val ACC: 78.8125 
+Training Loss: 0.00025867653312161565 
+----------------- 
+Epoch: 8 
+Top-1 Training ACC: 98.253125 
+Top-5 Training ACC: 99.97500000000001 
+Top-1 Val ACC: 50.475 
+Top-5 Val ACC: 78.98125 
+Training Loss: 0.00027484269230626523 
+----------------- 
+Epoch: 9 
+Top-1 Training ACC: 97.91875 
+Top-5 Training ACC: 99.959375 
+Top-1 Val ACC: 50.175000000000004 
+Top-5 Val ACC: 78.48125 
+Training Loss: 0.0004085055261384696 
+----------------- 
+Epoch: 10 
+Top-1 Training ACC: 98.05 
+Top-5 Training ACC: 99.96875 
+Top-1 Val ACC: 49.78125 
+Top-5 Val ACC: 78.26875 
+Training Loss: 0.0001453445729566738 
+----------------- 
