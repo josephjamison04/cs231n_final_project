@@ -178,13 +178,14 @@ def train(args):
     ####################################################################################################
     ####################################################################################################
     
-    optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
+    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay= args.weight_decay)
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[13, 20], gamma=0.1)
 
     # Write header of log file
     with open(args.logpath, "a+") as f:
         result = f"lr: {args.lr} \t batchsize: {args.batch_size} \t epochs: {args.epochs} \t option: {args.option}"
         result += f"\tdrop_path_rate: {args.dpr} \t patch size: {args.patch_size} \t num_stages: {args.num_stages}\n"
+        result += f"\tweight decay(L2 reg): {args.weight_decay}\n"
         result += "----------------- \n"
         f.write(result)
 
@@ -352,6 +353,7 @@ if __name__ == "__main__":
                                 # entire Resblocks during training -> additional regularization)
     patch_sizes = [4]    # patch size to use in the patch embedding layer (emulates transformers)
     stages = [4]         # number of stages in the model
+    weight_decay_factors = [0.0, 1e-4, 1e-3]
     
     hpo_loops = len(lrs)*len(drop_path_rate)*len(patch_sizes)*len(stages)
 
@@ -366,30 +368,32 @@ if __name__ == "__main__":
         for dpr in drop_path_rate:
             for patch in patch_sizes:
                 for ns in stages:
-                    now = datetime.datetime.now()
+                    for wd in weight_decay_factors:
+                        now = datetime.datetime.now()
 
-                    args.lr = lr
-                    args.dpr = dpr
-                    args.patch_size = patch
-                    args.num_stages = ns
-                    args.hidden_sizes = [96, 192, 384] if ns == 3 else [96, 192, 384, 768]
-                        
+                        args.lr = lr
+                        args.dpr = dpr
+                        args.patch_size = patch
+                        args.num_stages = ns
+                        args.hidden_sizes = [96, 192, 384] if ns == 3 else [96, 192, 384, 768]
+                        args.weight_decay = wd
+                            
 
-                    print(f"Now training model number {hpo_loop_counter} of {hpo_loops}...")
-                    if args.from_pretrain:
-                        args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-batchsize{args.batch_size}.pt"  # save path
-                        args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-batchsize{args.batch_size}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
-                    else:
-                        args.filepath = f"{args.option}-{args.epochs}epochs-lr_{args.lr}-dpr_{args.dpr}-patch{args.patch_size}-{args.num_stages}stages.pt"  # save path
-                        args.logpath = f"logs/{args.option}-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-patch{args.patch_size}-{args.num_stages}stages-{now.hour}_{now.minute}_{now.second}.txt"  # save path
+                        print(f"Now training model number {hpo_loop_counter} of {hpo_loops}...")
+                        if args.from_pretrain:
+                            args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-l2_{args.weight_decay}.pt"  # save path
+                            args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-l2_{args.weight_decay}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
+                        else:
+                            args.filepath = f"{args.option}-{args.epochs}epochs-lr_{args.lr}-dpr_{args.dpr}-patch{args.patch_size}-{args.num_stages}stages.pt"  # save path
+                            args.logpath = f"logs/{args.option}-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-patch{args.patch_size}-{args.num_stages}stages-{now.hour}_{now.minute}_{now.second}.txt"  # save path
 
-                    t1_val_acc = train(args)
-                    hpo_loop_counter += 1
+                        t1_val_acc = train(args)
+                        hpo_loop_counter += 1
 
-                    if t1_val_acc > best_t1_val_acc:
-                        best_model_path = args.filepath
-                        best_model_log = args.logpath
-                        best_t1_val_acc = t1_val_acc
+                        if t1_val_acc > best_t1_val_acc:
+                            best_model_path = args.filepath
+                            best_model_log = args.logpath
+                            best_t1_val_acc = t1_val_acc
                 
     # Write results file
     now2 = datetime.datetime.now()
