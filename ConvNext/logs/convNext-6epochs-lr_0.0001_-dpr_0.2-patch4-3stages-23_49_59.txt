@@ -1,0 +1,44 @@
+lr: 0.0001 	 batchsize: 64 	 epochs: 6 	 option: convNextdrop_path_rate: 0.2 	 patch size: 4 	 num_stages: 3
+----------------- 
+Epoch: 1 
+Top-1 Training ACC: 6.159375000000001 
+Top-5 Training ACC: 20.876562500000002 
+Top-1 Val ACC: 5.9125 
+Top-5 Val ACC: 20.318749999999998 
+Training Loss: 0.06567695736885071 
+----------------- 
+Epoch: 2 
+Top-1 Training ACC: 9.8765625 
+Top-5 Training ACC: 29.098437500000003 
+Top-1 Val ACC: 9.8375 
+Top-5 Val ACC: 28.63125 
+Training Loss: 0.06422044336795807 
+----------------- 
+Epoch: 3 
+Top-1 Training ACC: 12.662499999999998 
+Top-5 Training ACC: 34.832812499999996 
+Top-1 Val ACC: 12.106250000000001 
+Top-5 Val ACC: 33.7125 
+Training Loss: 0.061421412974596024 
+----------------- 
+Epoch: 4 
+Top-1 Training ACC: 15.385937499999999 
+Top-5 Training ACC: 39.4390625 
+Top-1 Val ACC: 14.56875 
+Top-5 Val ACC: 37.78125 
+Training Loss: 0.059158045798540115 
+----------------- 
+Epoch: 5 
+Top-1 Training ACC: 17.790625 
+Top-5 Training ACC: 43.3390625 
+Top-1 Val ACC: 16.3125 
+Top-5 Val ACC: 41.30625 
+Training Loss: 0.05719943717122078 
+----------------- 
+Epoch: 6 
+Top-1 Training ACC: 19.99375 
+Top-5 Training ACC: 47.071875 
+Top-1 Val ACC: 18.087500000000002 
+Top-5 Val ACC: 44.19375 
+Training Loss: 0.05504592880606651 
+----------------- 
