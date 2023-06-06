@@ -52,8 +52,11 @@ def load_data(args, device):
     channel_means = torch.tensor([103.20615017604828, 111.2633871603012, 115.82018423938752]).to(device)
     channel_sds = torch.tensor([71.08110246072079, 66.65810962849511, 67.36857566774157]).to(device)
 
-    normalize = T.Normalize(channel_means, channel_sds)
-    test_dataset = TensorDataset_transform((X_test, y_test), transform=normalize)
+    if args.norm:
+        normalize = T.Normalize(channel_means, channel_sds)
+        test_dataset = TensorDataset_transform((X_test, y_test), transform=normalize)
+    else:
+        test_dataset = TensorDataset(X_test, y_test)
     
     loader_test = DataLoader(test_dataset, batch_size=args.batch_size)
     print('finished setting dataloaders')
@@ -77,7 +80,6 @@ def load_model(args):
         model_path = "../fc_conv_transformer/resnet50-10-5e-05-cs231n.pt"
         num_classes = 100
         model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
-        # set_parameter_requires_grad(model_ft, feature_extract)
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, num_classes)
     elif args.option == "SwinTransformer":
@@ -114,7 +116,10 @@ def check_class_accuracy(loader, model, id_to_label, device):
                 x = x.reshape(-1,3*128*128)
             x = x.to(device=device, dtype=dtype)  # move to device, e.g. GPU
             y = y.to(device=device, dtype=torch.long)
-            scores = model(x)[0]
+            if args.option == "ConvNext":
+                scores = model(x)[0]
+            else:
+                scores = model(x)
             _, t1_preds = scores.max(1)
             t1_num_correct += (t1_preds == y).sum()
             # Calculate top_5 accuracy in addition to top-1
@@ -136,8 +141,8 @@ def check_class_accuracy(loader, model, id_to_label, device):
     
     t1_acc = t1_num_correct / num_samples
     t5_acc = t5_num_correct / num_samples
-    print('Top-1 Val ACC: Got %d / %d correct (%.2f)' % (t1_num_correct, num_samples, 100 * t1_acc))
-    print('Top-5 Val ACC: Got %d / %d correct (%.2f)' % (t5_num_correct, num_samples, 100 * t5_acc))
+    print('Top-1 Test ACC: Got %d / %d correct (%.2f)' % (t1_num_correct, num_samples, 100 * t1_acc))
+    print('Top-5 Test ACC: Got %d / %d correct (%.2f)' % (t5_num_correct, num_samples, 100 * t5_acc))
     
     return class_acc_dict
 
@@ -159,6 +164,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     
     parser.add_argument("--use_gpu", action="store_true")
+    parser.add_argument("--norm", action="store_true")
 
     parser.add_argument(
         "--batch_size",
