@@ -4,10 +4,34 @@ import pandas as pd
 
 import torch
 import torchvision
-
+import torchvision.transforms as T
+from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import Dataset
 from transformers import ConvNextConfig, ConvNextForImageClassification
 
-def load_data():
+from tqdm import tqdm
+
+class TensorDataset_transform(Dataset):
+    def __init__(self, tensors, transform=None):
+        assert all(tensors[0].size(0) == tensor.size(0) for tensor in tensors)
+        self.tensors = tensors
+        self.transform = transform
+
+    def __getitem__(self, index):
+        x = self.tensors[0][index]
+        # Convert to float32
+        x = x.float()
+        if self.transform:
+            x = self.transform(x)
+
+        y = self.tensors[1][index]
+
+        return x, y
+
+    def __len__(self):
+        return self.tensors[0].size(0)
+
+def load_data(args, device):
 
     data_dir = '/home/ubuntu/CS231N/data/split-datasets/'
     labels_dtype = np.int64
@@ -19,11 +43,25 @@ def load_data():
     y_test = y_test.flatten().astype(labels_dtype)
     print(f"Test data size: {X_test.shape}")
     print(f"Test labels size: {y_test.shape}")
-    return X_test, y_test
 
-def load_model():
+    X_test = torch.from_numpy(X_test).to(device)
+    y_test = torch.from_numpy(y_test).to(device)
+
+    channel_means = torch.tensor([103.20615017604828, 111.2633871603012, 115.82018423938752]).to(device)
+    channel_sds = torch.tensor([71.08110246072079, 66.65810962849511, 67.36857566774157]).to(device)
+
+    normalize = T.Normalize(channel_means, channel_sds)
+    test_dataset = TensorDataset_transform((X_test, y_test), transform=normalize)
+    
+    loader_test = DataLoader(test_dataset, batch_size=args.batch_size)
+    print('finished setting dataloaders')
+
+    return loader_test
+
+
+def load_model(args):
     print("Loading model ...")
-    if args.option == "ConvNext":
+    if args.option == "ConvNext": # Update this to the best/final convnext model
         model_path = '../ConvNext/convNext-from_pretrain-10epochs-lr_0.0001-l2_0.0.pt'
     # model = ConvNextForImageClassification()
     saved_contents = torch.load(model_path)
@@ -33,18 +71,50 @@ def load_model():
     return model
     
 
-def evaluate_classes(model, y_test):
-    scores = model(X_test)[0]
-    print(scores[0])
-    preds = torch.argmax(scores, dim=1)
-    accuracy = (preds == y_test)
-    print(f"Test accuracy: {accuracy}% of {preds.shape[0]} test examples")
+def check_accuracy(loader, model, device):
+    dtype = torch.float32
 
+    TOP_K = 5
+
+    t1_num_correct = 0
+    t5_num_correct = 0
+    num_samples = 0
+    model.eval()  # set model to evaluation mode
+    with torch.no_grad():
+        for batch in tqdm(loader):
+            x,y =batch
+            if args.option =='fc':
+                x = x.reshape(-1,3*128*128)
+            x = x.to(device=device, dtype=dtype)  # move to device, e.g. GPU
+            y = y.to(device=device, dtype=torch.long)
+            scores = model(x)[0]
+            _, t1_preds = scores.max(1)
+            t1_num_correct += (t1_preds == y).sum()
+            # Calculate top_5 accuracy in addition to top-1
+            t5_preds = torch.argsort(-scores, dim=1)[:, :TOP_K]
+            t5_num_correct += (torch.any(t5_preds == y.unsqueeze(1).expand_as(t5_preds), 1)).sum()
+
+            num_samples += t1_preds.size(0)
+    
+    t1_acc = t1_num_correct / num_samples
+    t5_acc = t5_num_correct / num_samples
+    print('Top-1 Val ACC: Got %d / %d correct (%.2f)' % (t1_num_correct, num_samples, 100 * t1_acc))
+    print('Top-5 Val ACC: Got %d / %d correct (%.2f)' % (t5_num_correct, num_samples, 100 * t5_acc))
+    
+    return t1_num_correct, num_samples, t5_num_correct
 
 
 def get_args():
     parser = argparse.ArgumentParser()
     
+    parser.add_argument("--use_gpu", action="store_true")
+
+    parser.add_argument(
+        "--batch_size",
+        help="specify batch size. default 64",
+        type=int,
+        default=64,
+    )
     parser.add_argument(
         "--option",
         type=str,
@@ -58,6 +128,8 @@ def get_args():
 
 if __name__ == "__main__":
     args = get_args()
-    X_test, y_test = load_data()
-    model = load_model()
-    evaluate_classes(model, y_test)
+    device = torch.device("cuda") if args.use_gpu else torch.device("cpu")
+
+    loader_test = load_data(args, device)
+    model = load_model(args)
+    check_accuracy(loader_test, model, device)
