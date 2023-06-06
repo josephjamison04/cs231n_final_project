@@ -24,9 +24,11 @@ def load_data():
 def load_model():
     print("Loading model ...")
     if args.option == "ConvNext":
-        model_path = '/../ConvNext/convNext-from_pretrain-10epochs-lr_0.0001-l2_0.0.pt'
-    model = ConvNextForImageClassification()
-    model.load_state_dict(torch.load(model_path))
+        model_path = '../ConvNext/convNext-from_pretrain-10epochs-lr_0.0001-l2_0.0.pt'
+    # model = ConvNextForImageClassification()
+    saved_contents = torch.load(model_path)
+    model = ConvNextForImageClassification.from_pretrained("facebook/convnext-tiny-224")
+    model.load_state_dict(saved_contents["model"])
     model.eval()
     return model
     
@@ -37,7 +39,7 @@ def evaluate_classes(model, y_test):
     preds = torch.argmax(scores, dim=1)
     accuracy = (preds == y_test)
     print(f"Test accuracy: {accuracy}% of {preds.shape[0]} test examples")
-    
+
 
 
 def get_args():
