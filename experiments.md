@@ -71,31 +71,20 @@ Training time: 1 min per epoch
 
 ---
 
-# ConvNext
+# ConvNext - with finetuning
 
-## Experiment 1 - without finetuning
+lr: 0.0001 	 batchsize: 64 	 epochs: 10 	 option: convNext	drop_path_rate: 0.0 	 patch size: 4 	 num_stages: 4    weight decay(L2 reg): 0.001
 
-Training time ~ 30 minutes 
+Epoch: 3 
+- Top-1 Training ACC: 79.084375 
+- Top-5 Training ACC: 96.03125 
+- Top-1 Val ACC: 51.425 
+- Top-5 Val ACC: 81.175 
+- Training Loss: 0.010686472989618778 
 
- - Top-1 Training ACC: Got 3836 / 64000 correct (5.99)
- - Top-5 Training ACC: Got 13670 / 64000 correct (21.36)
- - Top-1 Val ACC: Got 916 / 16000 correct (5.73)
- - Top-5 Val ACC: Got 3259 / 16000 correct (20.37)
+---
 
-```python train.py --use_gpu --batch_size 64 --lr 1e-5 --epochs 3 --option convNext```
-
-## Experiment 2 - without finetuning
-
-Training Time ~ 30 min
-
- - Top-1 Training ACC: Got 9700 / 64000 correct (15.16)
- - Top-5 Training ACC: Got 25373 / 64000 correct (39.65)
- - Top-1 Val ACC: Got 2240 / 16000 correct (14.00)
- - Top-5 Val ACC: Got 5933 / 16000 correct (37.08)
-
-```python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 3 --option convNext```
-
-## Experiment 3 - without finetuning
+## ConvNext - without pretrain/finetuning
 
 Training Time ~70 minutes
 
@@ -108,23 +97,6 @@ Training Time ~70 minutes
 
 ```python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 10 --option convNext```
 
-## Experiment 4 - from pretrained weights, with finetuning
-
-Training Time ~60 minutes
-
-### At epoch 3:
-- Top-1 Training ACC: Got 50590 / 64000 correct (79.05)
-- Top-5 Training ACC: Got 61443 / 64000 correct (96.00)
-- Top-1 Val ACC: Got 8236 / 16000 correct (51.48)
-- Top-5 Val ACC: Got 12998 / 16000 correct (81.24)
-
-### At epoch 10:
- - Top-1 Training ACC: Got 62708 / 64000 correct (97.98)
- - Top-5 Training ACC: Got 63982 / 64000 correct (99.97)
- - Top-1 Val ACC: Got 7975 / 16000 correct (49.84)
- - Top-5 Val ACC: Got 12532 / 16000 correct (78.33)
-
-```python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 10 --option convNext --from_pretrain```
 
 ---
 
