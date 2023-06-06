@@ -191,7 +191,7 @@ if __name__ == "__main__":
     loader_test, id_to_label = load_data(args, device)
     model = load_model(args)
     class_acc_dict = check_class_accuracy(loader_test, model, id_to_label, device)
-    sorted_class_list = pd.DataFrame(np.array(analyze_class_errors(class_acc_dict)).T)
+    sorted_class_list = pd.DataFrame(np.array(analyze_class_errors(class_acc_dict)))
     
     save_path = f"sorted_class_accuracies_{args.option}.csv"
     sorted_class_list.to_csv(save_path)
