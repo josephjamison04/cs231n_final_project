@@ -63,9 +63,6 @@ def load_data(args, device):
     for i in range(label_names.shape[0]):
         id_to_label[int(label_names.iloc[i][1])] = label_names.iloc[i][0]
 
-    print("id_to_label dict:", id_to_label)
-    raise ValueError
-
     print('finished retreiving label ids')
     return loader_test, id_to_label
 
@@ -89,7 +86,7 @@ def check_class_accuracy(loader, model, id_to_label, device):
     # Initialize class_acc_dict with class_label:[0, 0, 0] for [t1_acc, t5_acc, num_examples]
     class_acc_dict = {}
     for i in id_to_label:
-        class_acc_dict[id_to_label[i]] = [0,0,0]
+        class_acc_dict[id_to_label[i]] = np.array([0,0,0])
 
     t1_num_correct = 0
     t5_num_correct = 0
@@ -108,16 +105,18 @@ def check_class_accuracy(loader, model, id_to_label, device):
             # Calculate top_5 accuracy in addition to top-1
             t5_preds = torch.argsort(-scores, dim=1)[:, :TOP_K]
             t5_correct = (torch.any(t5_preds == y.unsqueeze(1).expand_as(t5_preds), 1))
+            
             t5_num_correct += t5_correct.sum()
             num_samples += t1_preds.size(0)
 
             # Add class accuracies to class accuaracy dictionary
             for i in range(len(y)):
-                class_acc_dict[id_to_label[y[i]]] += [0, 0, 1]
                 if t1_preds[i] == y[i]:
-                    class_acc_dict[id_to_label[y[i]]] += [1, 1, 0]
-                elif t5_correct:
-                    class_acc_dict[id_to_label[y[i]]] += [0, 1, 0]
+                    class_acc_dict[id_to_label[y[i].item()]] += np.array([1, 1, 1])
+                elif t5_correct[i].item():
+                    class_acc_dict[id_to_label[y[i].item()]] += np.array([0, 1, 1])
+                else:
+                    class_acc_dict[id_to_label[y[i].item()]] += np.array([0, 0, 1])
 
     
     t1_acc = t1_num_correct / num_samples
@@ -150,6 +149,20 @@ def get_args():
     args = parser.parse_args()
     return args
 
+def analyze_class_errors(class_acc_dict):
+    TOP_K = 5
+    class_list = []
+    for i in class_acc_dict:
+        class_list.append((i, float(class_acc_dict[i][0])/class_acc_dict[i][2], 
+                                float(class_acc_dict[i][1])/class_acc_dict[i][2]))
+    class_list.sort(key=lambda x: x[1])
+    worst_5 = class_list[:TOP_K]
+    best_5 = class_list[-TOP_K:][::-1]
+    print(f"The top 5 classes with best performance are {best_5}")
+    print(f"The bottom 5 classes with worst performance are {worst_5}")
+    return class_list
+    
+
 if __name__ == "__main__":
     args = get_args()
     device = torch.device("cuda") if args.use_gpu else torch.device("cpu")
@@ -157,4 +170,7 @@ if __name__ == "__main__":
     loader_test, id_to_label = load_data(args, device)
     model = load_model(args)
     class_acc_dict = check_class_accuracy(loader_test, model, id_to_label, device)
-    print("Class_acc_dict:", class_acc_dict) 
+    sorted_class_list = pd.DataFrame(np.array(analyze_class_errors(class_acc_dict)).T)
+    
+    save_path = f"sorted_class_accuracies_{args.option}.csv"
+    sorted_class_list.to_csv(save_path)
