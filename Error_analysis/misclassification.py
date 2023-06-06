@@ -56,7 +56,18 @@ def load_data(args, device):
     loader_test = DataLoader(test_dataset, batch_size=args.batch_size)
     print('finished setting dataloaders')
 
-    return loader_test
+    label_names_path = '../data_preprocessing/label_names.csv'
+    label_names = pd.read_csv(label_names_path)
+
+    id_to_label ={}
+    for i in range(label_names.shape[0]):
+        id_to_label[int(label_names.iloc[i][1])] = label_names.iloc[i][0]
+
+    print("id_to_label dict:", id_to_label)
+    raise ValueError
+
+    print('finished retreiving label ids')
+    return loader_test, id_to_label
 
 
 def load_model(args):
@@ -71,10 +82,14 @@ def load_model(args):
     return model
     
 
-def check_accuracy(loader, model, device):
+def check_class_accuracy(loader, model, id_to_label, device):
     dtype = torch.float32
 
     TOP_K = 5
+    # Initialize class_acc_dict with class_label:[0, 0, 0] for [t1_acc, t5_acc, num_examples]
+    class_acc_dict = {}
+    for i in id_to_label:
+        class_acc_dict[id_to_label[i]] = [0,0,0]
 
     t1_num_correct = 0
     t5_num_correct = 0
@@ -92,16 +107,25 @@ def check_accuracy(loader, model, device):
             t1_num_correct += (t1_preds == y).sum()
             # Calculate top_5 accuracy in addition to top-1
             t5_preds = torch.argsort(-scores, dim=1)[:, :TOP_K]
-            t5_num_correct += (torch.any(t5_preds == y.unsqueeze(1).expand_as(t5_preds), 1)).sum()
-
+            t5_correct = (torch.any(t5_preds == y.unsqueeze(1).expand_as(t5_preds), 1))
+            t5_num_correct += t5_correct.sum()
             num_samples += t1_preds.size(0)
+
+            # Add class accuracies to class accuaracy dictionary
+            for i in range(len(y)):
+                class_acc_dict[id_to_label[y[i]]] += [0, 0, 1]
+                if t1_preds[i] == y[i]:
+                    class_acc_dict[id_to_label[y[i]]] += [1, 1, 0]
+                elif t5_correct:
+                    class_acc_dict[id_to_label[y[i]]] += [0, 1, 0]
+
     
     t1_acc = t1_num_correct / num_samples
     t5_acc = t5_num_correct / num_samples
     print('Top-1 Val ACC: Got %d / %d correct (%.2f)' % (t1_num_correct, num_samples, 100 * t1_acc))
     print('Top-5 Val ACC: Got %d / %d correct (%.2f)' % (t5_num_correct, num_samples, 100 * t5_acc))
     
-    return t1_num_correct, num_samples, t5_num_correct
+    return class_acc_dict
 
 
 def get_args():
@@ -130,6 +154,7 @@ if __name__ == "__main__":
     args = get_args()
     device = torch.device("cuda") if args.use_gpu else torch.device("cpu")
 
-    loader_test = load_data(args, device)
+    loader_test, id_to_label = load_data(args, device)
     model = load_model(args)
-    check_accuracy(loader_test, model, device)
+    class_acc_dict = check_class_accuracy(loader_test, model, id_to_label, device)
+    print("Class_acc_dict:", class_acc_dict) 
