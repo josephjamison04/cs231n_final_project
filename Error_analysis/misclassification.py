@@ -8,6 +8,8 @@ import torchvision.transforms as T
 from torch.utils.data import TensorDataset, DataLoader
 from torch.utils.data import Dataset
 from transformers import ConvNextConfig, ConvNextForImageClassification
+from torchvision import models
+import torch.nn as nn
 
 from tqdm import tqdm
 
@@ -68,12 +70,25 @@ def load_data(args, device):
 
 
 def load_model(args):
-    print("Loading model ...")
     if args.option == "ConvNext": # Update this to the best/final convnext model
-        model_path = '../ConvNext/convNext-from_pretrain-10epochs-lr_0.0001-l2_0.0.pt'
-    # model = ConvNextForImageClassification()
+        model_path = '../ConvNext/convNext-from_pretrain-10epochs-lr_0.0001-l2_0.001.pt'
+        model = ConvNextForImageClassification.from_pretrained("facebook/convnext-tiny-224")
+    elif args.option == "ResNet":
+        model_path = "../fc_conv_transformer/resnet50-10-5e-05-cs231n.pt"
+        num_classes = 100
+        model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
+        # set_parameter_requires_grad(model_ft, feature_extract)
+        num_ftrs = model.fc.in_features
+        model.fc = nn.Linear(num_ftrs, num_classes)
+    elif args.option == "SwinTransformer":
+        model_path = '../SwinTransformer/swin-from_pretrain-5epochs-lr_1e-05-l2_0.0.pt'
+    elif args.option == "ViT":
+        model_path = '' # Update with path to top performing ViT model .pt file
+        raise NotImplementedError
+    
     saved_contents = torch.load(model_path)
-    model = ConvNextForImageClassification.from_pretrained("facebook/convnext-tiny-224")
+    print("Loaded model")
+    
     model.load_state_dict(saved_contents["model"])
     model.eval()
     return model
@@ -127,6 +142,19 @@ def check_class_accuracy(loader, model, id_to_label, device):
     return class_acc_dict
 
 
+def analyze_class_errors(class_acc_dict):
+    TOP_K = 5
+    class_list = []
+    for i in class_acc_dict:
+        class_list.append((i, float(class_acc_dict[i][0])/class_acc_dict[i][2], 
+                                float(class_acc_dict[i][1])/class_acc_dict[i][2]))
+    class_list.sort(key=lambda x: x[1])
+    worst_5 = class_list[:TOP_K]
+    best_5 = class_list[-TOP_K:][::-1]
+    print(f"The top 5 classes with best performance are {best_5}")
+    print(f"The bottom 5 classes with worst performance are {worst_5}")
+    return class_list
+
 def get_args():
     parser = argparse.ArgumentParser()
     
@@ -142,25 +170,12 @@ def get_args():
         "--option",
         type=str,
         help="choose which model class you want to evaluate",
-        choices=("ConvNext", "fc", "conv_transformer"),
+        choices=("ConvNext", "fc", "conv_transformer, SwinTransformer", "ViT", "ResNet"),
         default="ConvNext",
     )
 
     args = parser.parse_args()
     return args
-
-def analyze_class_errors(class_acc_dict):
-    TOP_K = 5
-    class_list = []
-    for i in class_acc_dict:
-        class_list.append((i, float(class_acc_dict[i][0])/class_acc_dict[i][2], 
-                                float(class_acc_dict[i][1])/class_acc_dict[i][2]))
-    class_list.sort(key=lambda x: x[1])
-    worst_5 = class_list[:TOP_K]
-    best_5 = class_list[-TOP_K:][::-1]
-    print(f"The top 5 classes with best performance are {best_5}")
-    print(f"The bottom 5 classes with worst performance are {worst_5}")
-    return class_list
     
 
 if __name__ == "__main__":
