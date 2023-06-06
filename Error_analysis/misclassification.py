@@ -157,4 +157,4 @@ if __name__ == "__main__":
     loader_test, id_to_label = load_data(args, device)
     model = load_model(args)
     class_acc_dict = check_class_accuracy(loader_test, model, id_to_label, device)
-    print("Class_acc_dict:", class_acc_dict)
+    print("Class_acc_dict:", class_acc_dict) 
