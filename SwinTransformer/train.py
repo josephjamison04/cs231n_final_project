@@ -138,28 +138,13 @@ def train(args):
     #T is transform imported from torch vision
     channel_means = torch.tensor([103.20615017604828, 111.2633871603012, 115.82018423938752]).to(device)
     channel_sds = torch.tensor([71.08110246072079, 66.65810962849511, 67.36857566774157]).to(device)
-
-    if args.from_pretrain and args.norm:
-        image_processor = ViTImageProcessor(do_resize=True, size={"height" : 256, "width" : 256}, do_normalize=True, image_mean=channel_means, image_std=channel_sds)
-        X_train = image_processor(X_train, return_tensors="pt")
-        X_train = X_train["pixel_values"]
-        X_valid = image_processor(X_valid, return_tensors="pt")
-        X_valid = X_valid["pixel_values"]
         
-        train_dataset = TensorDataset(X_train, y_train)
-        val_dataset = TensorDataset(X_valid, y_valid)
-    elif args.norm:
+    if args.norm:
     # if args.norm:
         normalize = T.Normalize(channel_means, channel_sds)
 
         train_dataset = TensorDataset_transform((X_train, y_train), transform=normalize)
         val_dataset = TensorDataset_transform((X_valid, y_valid), transform=normalize)
-    elif args.from_pretrain:
-        image_processor = ViTImageProcessor(do_resize=True, size={"height" : 256, "width" : 256}, do_normalize=False)
-        X_train = tqdm(image_processor(X_train, return_tensors="pt"))
-        X_train = X_train["pixel_values"]
-        X_valid = image_processor(X_valid, return_tensors="pt")
-        X_valid = X_valid["pixel_values"]
         
         train_dataset = TensorDataset(X_train, y_train)
         val_dataset = TensorDataset(X_valid, y_valid)
@@ -188,7 +173,7 @@ def train(args):
 
         if args.from_pretrain:
             # Initializing a model (with pretrained weights and defined config) from the convnext-tiny-224 style configuration
-            # image_processor = ViTImageProcessor(do_resize=True, size={"height" : 256, "width" : 256}, do_normalize=False)
+            image_processor = ViTImageProcessor(do_resize=True, size={"height" : 256, "width" : 256}, do_normalize=False)
             model = Swinv2ForImageClassification.from_pretrained("microsoft/swinv2-tiny-patch4-window8-256")
         else:
             # Initialize with random weights
@@ -225,9 +210,9 @@ def train(args):
         for batch in tqdm(loader_train):
             x ,y = batch
             
-            # if args.from_pretrain:
-            #     x = image_processor(x, return_tensors="pt")
-            #     x = x["pixel_values"]
+            if args.from_pretrain:
+                x = image_processor(x, return_tensors="pt")
+                x = x["pixel_values"]
                 
             model.train()  # put model to training mode
             if args.option =='fc':
@@ -309,11 +294,11 @@ def check_accuracy(loader, model, image_processor=None):
         for batch in tqdm(loader):
             x,y =batch
             
-            # if args.from_pretrain:
-            #     # x = image_processor([i for i in x], return_tensors="pt")
-            #     x = image_processor(x, return_tensors="pt")
-            #     # print(x["pixel_values"].shape)
-            #     x = x["pixel_values"]
+            if args.from_pretrain:
+                # x = image_processor([i for i in x], return_tensors="pt")
+                x = image_processor(x, return_tensors="pt")
+                # print(x["pixel_values"].shape)
+                x = x["pixel_values"]
             
             if args.option =='fc':
                 x = x.reshape(-1,3*128*128)
@@ -379,74 +364,70 @@ def get_args():
 
 
 if __name__ == "__main__":
-    # args = get_args()
-    
-    # seed_everything(args.seed)
-    
-    # ####################################################################################
-    # # Hyperparameter grid search
-
-    # lrs = [5e-5, 1e-4, 5e-4]
-    # drop_path_rate = [0.0] # Drop rate for stochastic depth (i.e., randomly drops 
-    #                             # entire Resblocks during training -> additional regularization)
-    # patch_sizes = [4]    # patch size to use in the patch embedding layer (emulates transformers)
-    # stages = [4]         # number of stages in the model
-    # weight_decay_factors = [1e-4, 1e-3, 0.0]
-    
-    # hpo_loops = len(lrs)*len(drop_path_rate)*len(patch_sizes)*len(stages)*len(weight_decay_factors)
-
-    # print(f"HPO loop will train {hpo_loops} models for {args.epochs} epochs each.")
-    # print(f"Logs will be stored in SwinTransformers/logs folder")
-    # print('-'*100)
-    # ####################################################################################
-
-    # hpo_loop_counter = 1
-    # best_t1_val_acc = -1.0
-    # for lr in lrs:
-    #     for dpr in drop_path_rate:
-    #         for patch in patch_sizes:
-    #             for ns in stages:
-    #                 for wd in weight_decay_factors:
-    #                     now = datetime.datetime.now()
-
-    #                     args.lr = lr
-    #                     args.dpr = dpr
-    #                     args.patch_size = patch
-    #                     args.num_stages = ns
-    #                     args.hidden_sizes = [96, 192, 384] if ns == 3 else [96, 192, 384, 768]
-    #                     args.weight_decay = wd
-                            
-
-    #                     print(f"Now training model number {hpo_loop_counter} of {hpo_loops}...")
-    #                     if args.from_pretrain:
-    #                         args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-l2_{args.weight_decay}.pt"  # save path
-    #                         args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-l2_{args.weight_decay}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
-    #                     else:
-    #                         args.filepath = f"{args.option}-{args.epochs}epochs-lr_{args.lr}-dpr_{args.dpr}-patch{args.patch_size}-{args.num_stages}stages.pt"  # save path
-    #                         args.logpath = f"logs/{args.option}-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-patch{args.patch_size}-{args.num_stages}stages-{now.hour}_{now.minute}_{now.second}.txt"  # save path
-
-    #                     t1_val_acc = train(args)
-    #                     hpo_loop_counter += 1
-
-    #                     if t1_val_acc > best_t1_val_acc:
-    #                         best_model_path = args.filepath
-    #                         best_model_log = args.logpath
-    #                         best_t1_val_acc = t1_val_acc
-                
-    # # Write results file
-    # now2 = datetime.datetime.now()
-    # result_path = f"logs/RESULT_FILE-{now2.month}m_{now2.day}d_{now2.hour}h_{now2.minute}m.txt"
-    # with open(result_path, "a+") as f:
-        
-    #     f.write(f"Best top-1 validation accuracy out of {hpo_loops} models was {100* best_t1_val_acc}. \
-    #             \nThis occurred in model {best_model_path}, \nwhich was logged in {best_model_log}")
-    
     args = get_args()
-    args.dpr = 0.1
-    args.patch_size = 4
-    args.weight_decay = 1e-8
-    args.filepath = f"{args.option}-{args.epochs}-{args.lr}-cs231n.pt"  # save path
-    now = datetime.datetime.now()
-    args.logpath = f"logs/{args.option}-{args.epochs}-{args.lr}_{now.hour}_{now.minute}_{now.second}.txt"  # save path
+    
     seed_everything(args.seed)
-    train(args)
+    
+    ####################################################################################
+    # Hyperparameter grid search
+
+    lrs = [1e-5, 1e-4]
+    drop_path_rate = [0.0] # Drop rate for stochastic depth (i.e., randomly drops 
+                                # entire Resblocks during training -> additional regularization)
+    weight_decay_factors = [1e-8, 0.0]
+    
+    hpo_loops = len(lrs)*len(drop_path_rate)*len(weight_decay_factors)
+
+    print(f"HPO loop will train {hpo_loops} models for {args.epochs} epochs each.")
+    print(f"Logs will be stored in SwinTransformers/logs folder")
+    print('-'*100)
+    ####################################################################################
+
+    hpo_loop_counter = 1
+    best_t1_val_acc = -1.0
+    for lr in lrs:
+        for dpr in drop_path_rate:
+            for wd in weight_decay_factors:
+                now = datetime.datetime.now()
+
+                args.lr = lr
+                args.dpr = dpr
+                # args.num_stages = ns
+                # args.hidden_sizes = [96, 192, 384] if ns == 3 else [96, 192, 384, 768]
+                args.patch_size = 4
+                args.weight_decay = wd
+                    
+
+                print(f"Now training model number {hpo_loop_counter} of {hpo_loops}...")
+                if args.from_pretrain:
+                    args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-l2_{args.weight_decay}.pt"  # save path
+                    args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-l2_{args.weight_decay}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
+                else:
+                    args.filepath = f"{args.option}-{args.epochs}epochs-lr_{args.lr}-dpr_{args.dpr}.pt"  # save path
+                    args.logpath = f"logs/{args.option}-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
+
+                t1_val_acc = train(args)
+                hpo_loop_counter += 1
+
+                if t1_val_acc > best_t1_val_acc:
+                    best_model_path = args.filepath
+                    best_model_log = args.logpath
+                    best_t1_val_acc = t1_val_acc
+                
+    # Write results file
+    now2 = datetime.datetime.now()
+    result_path = f"logs/RESULT_FILE-{now2.month}m_{now2.day}d_{now2.hour}h_{now2.minute}m.txt"
+    with open(result_path, "a+") as f:
+        
+        f.write(f"Best top-1 validation accuracy out of {hpo_loops} models was {100* best_t1_val_acc}. \
+                \nThis occurred in model {best_model_path}, \nwhich was logged in {best_model_log}")
+    
+    # args = get_args()
+    # args.dpr = 0.1
+    # args.patch_size = 4
+    # args.weight_decay = 1e-8
+    # args.filepath = f"{args.option}-{args.epochs}-{args.lr}-cs231n.pt"  # save path
+    # now = datetime.datetime.now()
+    # args.logpath = f"logs/{args.option}-{args.epochs}-{args.lr}_{now.hour}_{now.minute}_{now.second}.txt"  # save path
+    # seed_everything(args.seed)
+    # train(args)

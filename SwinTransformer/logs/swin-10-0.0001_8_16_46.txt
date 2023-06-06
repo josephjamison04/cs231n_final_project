@@ -1,0 +1,11 @@
+lr: 0.0001 	 batchsize: 32 	 epochs: 10 	 option: swin
+	drop_path_rate: 0.1 	 patch size: 4 
+weight decay(L2 reg): 1e-08
+----------------- 
+Epoch: 1 
+Top-1 Training ACC: 65.9453125 
+Top-5 Training ACC: 91.0265625 
+Top-1 Val ACC: 58.09375 
+Top-5 Val ACC: 86.99375 
+Training Loss: 0.054006967693567276 
+----------------- 
