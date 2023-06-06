@@ -9,3 +9,31 @@ Top-1 Val ACC: 58.11875
 Top-5 Val ACC: 86.93125 
 Training Loss: 0.050201285630464554 
 ----------------- 
+Epoch: 2 
+Top-1 Training ACC: 74.47500000000001 
+Top-5 Training ACC: 95.159375 
+Top-1 Val ACC: 61.393750000000004 
+Top-5 Val ACC: 88.2125 
+Training Loss: 0.03932643681764603 
+----------------- 
+Epoch: 3 
+Top-1 Training ACC: 81.321875 
+Top-5 Training ACC: 97.5390625 
+Top-1 Val ACC: 61.431250000000006 
+Top-5 Val ACC: 88.14375 
+Training Loss: 0.02679736725986004 
+----------------- 
+Epoch: 4 
+Top-1 Training ACC: 86.434375 
+Top-5 Training ACC: 98.76718749999999 
+Top-1 Val ACC: 61.199999999999996 
+Top-5 Val ACC: 87.74374999999999 
+Training Loss: 0.030911825597286224 
+----------------- 
+Epoch: 5 
+Top-1 Training ACC: 89.071875 
+Top-5 Training ACC: 99.271875 
+Top-1 Val ACC: 60.25625 
+Top-5 Val ACC: 87.275 
+Training Loss: 0.02200767584145069 
+----------------- 

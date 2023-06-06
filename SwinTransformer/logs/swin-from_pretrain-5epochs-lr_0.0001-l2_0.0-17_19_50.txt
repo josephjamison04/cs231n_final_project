@@ -1,0 +1,39 @@
+lr: 0.0001 	 batchsize: 32 	 epochs: 5 	 option: swin
+	drop_path_rate: 0.0 	 patch size: 4 
+weight decay(L2 reg): 0.0
+----------------- 
+Epoch: 1 
+Top-1 Training ACC: 66.7265625 
+Top-5 Training ACC: 91.5359375 
+Top-1 Val ACC: 58.881249999999994 
+Top-5 Val ACC: 87.43125 
+Training Loss: 0.05580102652311325 
+----------------- 
+Epoch: 2 
+Top-1 Training ACC: 74.996875 
+Top-5 Training ACC: 95.315625 
+Top-1 Val ACC: 60.90624999999999 
+Top-5 Val ACC: 88.4375 
+Training Loss: 0.0396585650742054 
+----------------- 
+Epoch: 3 
+Top-1 Training ACC: 80.93125 
+Top-5 Training ACC: 97.4140625 
+Top-1 Val ACC: 61.35625 
+Top-5 Val ACC: 88.56875 
+Training Loss: 0.02514355070888996 
+----------------- 
+Epoch: 4 
+Top-1 Training ACC: 85.1359375 
+Top-5 Training ACC: 98.58749999999999 
+Top-1 Val ACC: 60.70625 
+Top-5 Val ACC: 87.7125 
+Training Loss: 0.025433870032429695 
+----------------- 
+Epoch: 5 
+Top-1 Training ACC: 89.8953125 
+Top-5 Training ACC: 99.39218749999999 
+Top-1 Val ACC: 61.006249999999994 
+Top-5 Val ACC: 87.5625 
+Training Loss: 0.026891667395830154 
+----------------- 

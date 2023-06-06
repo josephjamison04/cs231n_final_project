@@ -1,0 +1,3 @@
+Best top-1 validation accuracy out of 4 models was 62.3.                 
+This occurred in model swin-from_pretrain-5epochs-lr_1e-05-l2_0.0.pt, 
+which was logged in logs/swin-from_pretrain-5epochs-lr_1e-05-l2_0.0-12_12_6.txt
