@@ -31,6 +31,15 @@ def load_model():
     return model
     
 
+def evaluate_classes(model, y_test):
+    scores = model(X_test)[0]
+    print(scores[0])
+    preds = torch.argmax(scores, dim=1)
+    accuracy = (preds == y_test)
+    print(f"Test accuracy: {accuracy}% of {preds.shape[0]} test examples")
+    
+
+
 def get_args():
     parser = argparse.ArgumentParser()
     
@@ -49,5 +58,4 @@ if __name__ == "__main__":
     args = get_args()
     X_test, y_test = load_data()
     model = load_model()
-    scores = model(X_test)
-    print(scores[0])
+    evaluate_classes(model, y_test)
