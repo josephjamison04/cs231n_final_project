@@ -144,7 +144,7 @@ def check_class_accuracy(loader, model, id_to_label, device):
     print('Top-1 Test ACC: Got %d / %d correct (%.2f)' % (t1_num_correct, num_samples, 100 * t1_acc))
     print('Top-5 Test ACC: Got %d / %d correct (%.2f)' % (t5_num_correct, num_samples, 100 * t5_acc))
     
-    return class_acc_dict
+    return class_acc_dict, t1_acc, t5_acc
 
 
 def analyze_class_errors(class_acc_dict):
@@ -190,8 +190,10 @@ if __name__ == "__main__":
 
     loader_test, id_to_label = load_data(args, device)
     model = load_model(args)
-    class_acc_dict = check_class_accuracy(loader_test, model, id_to_label, device)
-    sorted_class_list = pd.DataFrame(np.array(analyze_class_errors(class_acc_dict)))
+    class_acc_dict, t1_acc, t5_acc = check_class_accuracy(loader_test, model, id_to_label, device)
+    sorted_class_list = analyze_class_errors(class_acc_dict)
+    sorted_class_list.append(("Total", t1_acc, t5_acc))
+    sorted_class_df = pd.DataFrame(np.array(sorted_class_list))
     
     save_path = f"sorted_class_accuracies_{args.option}.csv"
-    sorted_class_list.to_csv(save_path)
+    sorted_class_df.to_csv(save_path)
