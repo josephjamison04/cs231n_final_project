@@ -1,5 +1,6 @@
 import argparse
 import cv2
+import matplotlib.pyplot as plt
 import numpy as np
 import os
 import pandas as pd
@@ -116,42 +117,37 @@ def get_saliency_maps(loader, model, id_to_label, device):
     dtype = torch.float32
 
     model.eval()  # set model to evaluation mode
-    with torch.no_grad():
-        for batch in tqdm(loader):
-            x,y =batch
-            if args.option =='fc':
-                x = x.reshape(-1,3*128*128)
-            x = x.to(device=device, dtype=dtype)  # move to device, e.g. GPU
-            y = y.to(device=device, dtype=torch.long)
-            if args.option == "ConvNext":
-                scores = model(x)[0]
-            else:
-                scores = model(x)
-            _, t1_preds = scores.max(1)
-            t1_num_correct += (t1_preds == y).sum()
-            # Calculate top_5 accuracy in addition to top-1
-            t5_preds = torch.argsort(-scores, dim=1)[:, :TOP_K]
-            t5_correct = (torch.any(t5_preds == y.unsqueeze(1).expand_as(t5_preds), 1))
-            
-            t5_num_correct += t5_correct.sum()
-            num_samples += t1_preds.size(0)
+    for batch in tqdm(loader):
+        x,y =batch
+        x.requires_grad_()
+        if args.option =='fc':
+            x = x.reshape(-1,3*128*128)
+        x = x.to(device=device, dtype=dtype)  # move to device, e.g. GPU
+        y = y.to(device=device, dtype=torch.long)
+        if args.option == "ConvNext":
+            scores = model(x)[0]
+        else:
+            scores = model(x)
+        
+        unnormalized_loss = torch.sum(scores.gather(1, y.view(-1, 1)).squeeze())
+        unnormalized_loss.backward()
+        saliency, _ = torch.max(torch.abs(x.grad), dim=1)
 
-            # Add class accuracies to class accuaracy dictionary
-            for i in range(len(y)):
-                if t1_preds[i] == y[i]:
-                    class_acc_dict[id_to_label[y[i].item()]] += np.array([1, 1, 1])
-                elif t5_correct[i].item():
-                    class_acc_dict[id_to_label[y[i].item()]] += np.array([0, 1, 1])
-                else:
-                    class_acc_dict[id_to_label[y[i].item()]] += np.array([0, 0, 1])
+        saliency = saliency.numpy()
+        N = x.shape[0]
+        for i in range(N):
+            plt.subplot(2, N, i + 1)
+            plt.imshow(x[i])
+            plt.axis('off')
+            plt.title(id_to_label[y[i]])
+            plt.subplot(2, N, N + i + 1)
+            plt.imshow(saliency[i], cmap=plt.cm.hot)
+            plt.axis('off')
+            plt.gcf().set_size_inches(12, 5)
+        plt.show()
 
     
-    t1_acc = t1_num_correct / num_samples
-    t5_acc = t5_num_correct / num_samples
-    print('Top-1 Test ACC: Got %d / %d correct (%.2f)' % (t1_num_correct, num_samples, 100 * t1_acc))
-    print('Top-5 Test ACC: Got %d / %d correct (%.2f)' % (t5_num_correct, num_samples, 100 * t5_acc))
-    
-    return class_acc_dict
+    return saliency
 
 
 def analyze_class_errors(class_acc_dict):
@@ -197,8 +193,5 @@ if __name__ == "__main__":
 
     loader_test, id_to_label = load_data(args, device)
     model = load_model(args)
-    class_acc_dict = check_class_accuracy(loader_test, model, id_to_label, device)
-    sorted_class_list = pd.DataFrame(np.array(analyze_class_errors(class_acc_dict)))
+    saliency = get_saliency_maps(loader_test, model, id_to_label, device)
     
-    save_path = f"sorted_class_accuracies_{args.option}.csv"
-    sorted_class_list.to_csv(save_path)
