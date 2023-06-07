@@ -14,8 +14,6 @@ from transformers import ConvNextConfig, ConvNextForImageClassification
 from torchvision import models
 import torch.nn as nn
 
-from tqdm import tqdm
-
 class TensorDataset_transform(Dataset):
     def __init__(self, tensors, transform=None):
         assert all(tensors[0].size(0) == tensor.size(0) for tensor in tensors)
@@ -67,7 +65,7 @@ def load_data(args, device):
         print("Could not read in sample images")
     
     X_test = np.array(X_test).reshape(-1, 3, 128, 128)
-    y_test = y_test.flatten().astype(labels_dtype)
+    y_test = np.array(y_test).flatten().astype(labels_dtype)
     print(f"Test data size: {X_test.shape}")
     print(f"Test labels size: {y_test.shape}")
 
@@ -77,16 +75,12 @@ def load_data(args, device):
     channel_means = torch.tensor([103.20615017604828, 111.2633871603012, 115.82018423938752]).to(device)
     channel_sds = torch.tensor([71.08110246072079, 66.65810962849511, 67.36857566774157]).to(device)
 
-    if args.norm:
-        normalize = T.Normalize(channel_means, channel_sds)
-        test_dataset = TensorDataset_transform((X_test, y_test), transform=normalize)
-    else:
-        test_dataset = TensorDataset(X_test, y_test)
+    test_dataset = TensorDataset(X_test, y_test)
     
     loader_test = DataLoader(test_dataset, batch_size=args.batch_size)
     print('finished setting dataloaders')
 
-    return loader_test, id_to_label
+    return loader_test, id_to_label, X_test
 
 
 def load_model(args):
@@ -113,17 +107,19 @@ def load_model(args):
     return model
     
 
-def get_saliency_maps(loader, model, id_to_label, device):
+def get_saliency_maps(loader, model, id_to_label, X_test, device):
     dtype = torch.float32
 
     model.eval()  # set model to evaluation mode
-    for batch in tqdm(loader):
+    for batch in loader:
         x,y =batch
-        x.requires_grad_()
         if args.option =='fc':
             x = x.reshape(-1,3*128*128)
         x = x.to(device=device, dtype=dtype)  # move to device, e.g. GPU
         y = y.to(device=device, dtype=torch.long)
+        
+        x.requires_grad_()
+        
         if args.option == "ConvNext":
             scores = model(x)[0]
         else:
@@ -134,17 +130,20 @@ def get_saliency_maps(loader, model, id_to_label, device):
         saliency, _ = torch.max(torch.abs(x.grad), dim=1)
 
         saliency = saliency.numpy()
+        print_x = torch.permute(X_test,(0, 2, 3, 1)).detach().numpy()
+        print_x = np.fliplr(print_x.reshape(-1,3)).reshape(print_x.shape)
+
         N = x.shape[0]
         for i in range(N):
             plt.subplot(2, N, i + 1)
-            plt.imshow(x[i])
+            plt.imshow(print_x[i])
             plt.axis('off')
-            plt.title(id_to_label[y[i]])
+            plt.title(id_to_label[y[i].item()])
             plt.subplot(2, N, N + i + 1)
             plt.imshow(saliency[i], cmap=plt.cm.hot)
             plt.axis('off')
             plt.gcf().set_size_inches(12, 5)
-        plt.show()
+        plt.savefig(f"saliency_maps_{args.option}.jpg")
 
     
     return saliency
@@ -167,7 +166,6 @@ def get_args():
     parser = argparse.ArgumentParser()
     
     parser.add_argument("--use_gpu", action="store_true")
-    parser.add_argument("--norm", action="store_true")
 
     parser.add_argument(
         "--batch_size",
@@ -191,7 +189,7 @@ if __name__ == "__main__":
     args = get_args()
     device = torch.device("cuda") if args.use_gpu else torch.device("cpu")
 
-    loader_test, id_to_label = load_data(args, device)
+    loader_test, id_to_label, X_test = load_data(args, device)
     model = load_model(args)
-    saliency = get_saliency_maps(loader_test, model, id_to_label, device)
+    saliency = get_saliency_maps(loader_test, model, id_to_label, X_test, device)
     
