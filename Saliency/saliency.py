@@ -10,7 +10,7 @@ import torchvision
 import torchvision.transforms as T
 from torch.utils.data import TensorDataset, DataLoader
 from torch.utils.data import Dataset
-from transformers import ConvNextConfig, ConvNextForImageClassification
+from transformers import ConvNextConfig, ConvNextForImageClassification, Swinv2ForImageClassification, ViTImageProcessor
 from torchvision import models
 import torch.nn as nn
 
@@ -95,9 +95,7 @@ def load_model(args):
         model.fc = nn.Linear(num_ftrs, num_classes)
     elif args.option == "SwinTransformer":
         model_path = '../SwinTransformer/swin-from_pretrain-5epochs-lr_1e-05-l2_0.0.pt'
-    elif args.option == "ViT":
-        model_path = '' # Update with path to top performing ViT model .pt file
-        raise NotImplementedError
+        model = Swinv2ForImageClassification.from_pretrained("microsoft/swinv2-tiny-patch4-window8-256")
     
     saved_contents = torch.load(model_path)
     print("Loaded model")
@@ -113,6 +111,10 @@ def get_saliency_maps(loader, model, id_to_label, X_test, device):
     model.eval()  # set model to evaluation mode
     for batch in loader:
         x,y =batch
+        if args.option == 'SwinTransformer':
+                image_processor = ViTImageProcessor(do_resize=True, size={"height" : 256, "width" : 256}, do_normalize=False)
+                x = image_processor(x, return_tensors="pt")
+                x = x["pixel_values"]
         if args.option =='fc':
             x = x.reshape(-1,3*128*128)
         x = x.to(device=device, dtype=dtype)  # move to device, e.g. GPU
@@ -120,7 +122,7 @@ def get_saliency_maps(loader, model, id_to_label, X_test, device):
         
         x.requires_grad_()
         
-        if args.option == "ConvNext":
+        if args.option == "ConvNext" or args.option == "SwinTransformer":
             scores = model(x)[0]
         else:
             scores = model(x)
@@ -177,7 +179,7 @@ def get_args():
         "--option",
         type=str,
         help="choose which model class you want to evaluate",
-        choices=("ConvNext", "fc", "conv_transformer, SwinTransformer", "ViT", "ResNet"),
+        choices=("ConvNext", "fc", "conv_transformer", "SwinTransformer", "ViT", "ResNet"),
         default="ConvNext",
     )
 
