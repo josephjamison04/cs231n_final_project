@@ -144,7 +144,7 @@ def check_class_accuracy(loader, model, id_to_label, device):
     print('Top-1 Test ACC: Got %d / %d correct (%.2f)' % (t1_num_correct, num_samples, 100 * t1_acc))
     print('Top-5 Test ACC: Got %d / %d correct (%.2f)' % (t5_num_correct, num_samples, 100 * t5_acc))
     
-    return class_acc_dict, t1_acc, t5_acc
+    return class_acc_dict, t1_acc.item(), t5_acc.item()
 
 
 def analyze_class_errors(class_acc_dict):
