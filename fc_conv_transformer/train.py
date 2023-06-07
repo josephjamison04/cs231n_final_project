@@ -146,6 +146,14 @@ def train(args):
     else:
         train_dataset = TensorDataset(X_train, y_train)
         val_dataset = TensorDataset(X_valid, y_valid)
+
+    if args.option == 'vit_b16':
+        transform = T.Compose([
+                    T.Resize((224, 224),antialias =True),  # Resize to 224x224
+                    # Add any other transforms you need
+                ])
+        train_dataset = TensorDataset_transform((X_train, y_train), transform=transform)
+        val_dataset = TensorDataset_transform((X_valid, y_valid), transform=transform)
     loader_train = DataLoader(train_dataset, batch_size=args.batch_size)
     loader_val = DataLoader(val_dataset, batch_size=args.batch_size)
     print('finished setting dataloaders')
@@ -204,7 +212,7 @@ def train(args):
             Flatten(),
             nn.Linear(channel_out, num_classes))
     ####################################################################################################
-    '''transformer'''
+    '''transformer_Vit'''
     if args.option == 'trans':
         num_classes = 100
         # model = ImageTransformer(patch_size=16, img_size=128, in_chans=3, embed_dim=768, num_classes=num_classes)
@@ -217,7 +225,19 @@ def train(args):
             patch_size = 16,
             num_patches = 64,
             dropout=0.2,)
-    
+    ####################################################################################################
+    '''pretrained_Vit'''
+    if args.option == 'vit_b16':
+        num_classes = 100
+        model = models.vit_b_16(weights='IMAGENET1K_V1')
+        # Get the final layer
+        # final_layer = list(model.children())[-1]
+        # print(final_layer)
+        num_ftrs = model.heads.head.in_features  # Get the number of input features to the fc layer
+        # # Replace the existing fc layer with a new one
+        model.heads.head = nn.Linear(num_ftrs, num_classes)  # 100 output features for 100 classes
+
+
     ####################################################################################################
     '''AlexNet'''
     if args.option == 'alex':
@@ -252,8 +272,9 @@ def train(args):
     ####################################################################################################
     ####################################################################################################
     
-    optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
-    lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[13, 20], gamma=0.1)
+    # optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
+    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay= args.weight_decay)
+    # lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[13, 20], gamma=0.1)
 
     # Write header of log file
     with open(args.logpath, "a+") as f:
@@ -295,7 +316,7 @@ def train(args):
             # Actually update the parameters of the model using the gradients
             # computed by the backwards pass.
             optimizer.step()
-        lr_scheduler.step()
+        # lr_scheduler.step()
         t1_train_num_correct,train_num_samples, t5_train_num_correct =check_accuracy(loader_train,model,args)
         t1_train_epoch_acc = float(t1_train_num_correct) / train_num_samples
         t5_train_epoch_acc = float(t5_train_num_correct) / train_num_samples
@@ -328,6 +349,7 @@ def train(args):
         t1_val_accs.append(t1_val_epoch_acc)
         t5_val_accs.append(t5_val_epoch_acc)
         train_loss.append(loss.item())
+    return max_val_acc
         
         # log(args, t1_train_accs, t5_train_accs, t1_val_accs, t5_val_accs, train_loss)
 
@@ -399,6 +421,7 @@ def get_args():
     parser.add_argument("--use_gpu", action="store_true")
     parser.add_argument("--small_data", action="store_true")
     parser.add_argument("--norm", action="store_true")
+    parser.add_argument("--from_pretrain", action="store_true") 
 
     # hyper parameters
     parser.add_argument(
@@ -418,7 +441,7 @@ def get_args():
         "--option",
         type=str,
         help="conv: convolutional layers; fc: linear only; trans: conv + transformer",
-        choices=("conv", "fc", "trans", "alex", "resnet18", "resnet50"),
+        choices=("conv", "fc", "trans", "alex", "resnet18", "resnet50",'vit_b16'),
         default="fc",
     )
 
@@ -427,9 +450,64 @@ def get_args():
 
 if __name__ == "__main__":
     args = get_args()
-    args.filepath = f"{args.option}-{args.epochs}-{args.lr}-cs231n.pt"  # save path
-    now = datetime.datetime.now()
-    args.logpath = f"logs/{args.option}-{args.epochs}-{args.lr}_{now.hour}_{now.minute}_{now.second}.txt"  # save path
+    
     seed_everything(args.seed)
-    train(args)
+    
+    ####################################################################################
+    # Hyperparameter grid search
+
+    lrs = [3e-5, 3e-4]
+    drop_path_rate = [0.0] # Drop rate for stochastic depth (i.e., randomly drops 
+                                # entire Resblocks during training -> additional regularization)
+    weight_decay_factors = [1e-8]
+    
+    hpo_loops = len(lrs)*len(drop_path_rate)*len(weight_decay_factors)
+
+    print(f"HPO loop will train {hpo_loops} models for {args.epochs} epochs each.")
+    print(f"Logs will be stored in SwinTransformers/logs folder")
+    print('-'*100)
+    ####################################################################################
+
+    hpo_loop_counter = 1
+    best_t1_val_acc = -1.0
+    for lr in lrs:
+        for dpr in drop_path_rate:
+            for wd in weight_decay_factors:
+                now = datetime.datetime.now()
+
+                args.lr = lr
+                args.dpr = dpr
+                args.patch_size = 16
+                args.weight_decay = wd
+                    
+
+                print(f"Now training model number {hpo_loop_counter} of {hpo_loops}...")
+                if args.from_pretrain:
+                    args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-l2_{args.weight_decay}.pt"  # save path
+                    args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-l2_{args.weight_decay}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
+                else:
+                    args.filepath = f"{args.option}-{args.epochs}epochs-lr_{args.lr}-dpr_{args.dpr}.pt"  # save path
+                    args.logpath = f"logs/{args.option}-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
+
+                t1_val_acc = train(args)
+                hpo_loop_counter += 1
+
+                if t1_val_acc > best_t1_val_acc:
+                    best_model_path = args.filepath
+                    best_model_log = args.logpath
+                    best_t1_val_acc = t1_val_acc
+                
+    # Write results file
+    now2 = datetime.datetime.now()
+    result_path = f"logs/RESULT_FILE-{now2.month}m_{now2.day}d_{now2.hour}h_{now2.minute}m.txt"
+    with open(result_path, "a+") as f:
+        
+        f.write(f"Best top-1 validation accuracy out of {hpo_loops} models was {100* best_t1_val_acc}. \
+                \nThis occurred in model {best_model_path}, \nwhich was logged in {best_model_log}")
+    # args = get_args()
+    # args.filepath = f"{args.option}-{args.epochs}-{args.lr}-cs231n.pt"  # save path
+    # now = datetime.datetime.now()
+    # args.logpath = f"logs/{args.option}-{args.epochs}-{args.lr}_{now.hour}_{now.minute}_{now.second}.txt"  # save path
+    # seed_everything(args.seed)
+    # train(args)
     

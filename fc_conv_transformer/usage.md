@@ -14,7 +14,9 @@
 ## for transformer layers
 
     python train.py --use_gpu --batch_size 64 --lr 3e-5 --epochs 10 --option trans
+## for pretrained vit_b16
 
+    
 ## for AlexNet model
 
     python train.py --use_gpu --batch_size 64 --lr 1e-5 --epochs 3 --option alex
