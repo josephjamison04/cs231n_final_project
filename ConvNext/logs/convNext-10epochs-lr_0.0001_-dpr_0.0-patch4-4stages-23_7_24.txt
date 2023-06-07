@@ -1,0 +1,4 @@
+lr: 0.0001 	 batchsize: 64 	 epochs: 10 	 option: convNext
+	drop_path_rate: 0.0 	 patch size: 4 	 num_stages: 4
+weight decay(L2 reg): 0.001
+----------------- 

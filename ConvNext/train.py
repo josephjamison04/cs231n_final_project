@@ -348,12 +348,12 @@ if __name__ == "__main__":
     ####################################################################################
     # Hyperparameter grid search
 
-    lrs = [5e-5, 1e-4, 5e-4]
+    lrs = [1e-4]
     drop_path_rate = [0.0] # Drop rate for stochastic depth (i.e., randomly drops 
                                 # entire Resblocks during training -> additional regularization)
     patch_sizes = [4]    # patch size to use in the patch embedding layer (emulates transformers)
     stages = [4]         # number of stages in the model
-    weight_decay_factors = [1e-4, 1e-3, 0.0]
+    weight_decay_factors = [1e-3]
     
     hpo_loops = len(lrs)*len(drop_path_rate)*len(patch_sizes)*len(stages)*len(weight_decay_factors)
 

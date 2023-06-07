@@ -97,6 +97,17 @@ Training Time ~70 minutes
 
 ```python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 10 --option convNext```
 
+---
+
+## ConvNext - with pretrain/finetuning and data normalization
+
+lr: 0.0001 	 batchsize: 64 	 epochs: 10 	 option: convNext
+drop_path_rate: 0.0 	 patch size: 4 	 num_stages: 4  weight decay(L2 reg): 0.001
+
+
+
+```python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 10 --option convNext --norm```
+
 
 ---
 
