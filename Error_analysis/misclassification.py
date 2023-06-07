@@ -56,6 +56,12 @@ def load_data(args, device):
     if args.norm:
         normalize = T.Normalize(channel_means, channel_sds)
         test_dataset = TensorDataset_transform((X_test, y_test), transform=normalize)
+    elif args.option == 'ViT':
+        transform = T.Compose([
+                    T.Resize((224, 224),antialias =True),  # Resize to 224x224
+                    # Add any other transforms you need
+                ])
+        test_dataset = TensorDataset_transform((X_test, y_test), transform=transform)
     else:
         test_dataset = TensorDataset(X_test, y_test)
     
@@ -87,8 +93,11 @@ def load_model(args):
         model_path = '../SwinTransformer/swin-from_pretrain-5epochs-lr_1e-05-l2_0.0.pt'
         model = Swinv2ForImageClassification.from_pretrained("microsoft/swinv2-tiny-patch4-window8-256")
     elif args.option == "ViT":
-        model_path = '' # Update with path to top performing ViT model .pt file
-        raise NotImplementedError
+        model_path = "../fc_conv_transformer/vit_b16-from_pretrain-5epochs-lr_3e-05-l2_1e-08.pt"
+        num_classes = 100
+        model = models.vit_b_16(weights='IMAGENET1K_V1')
+        num_ftrs = model.heads.head.in_features
+        model.heads.head = nn.Linear(num_ftrs, num_classes)
     
     saved_contents = torch.load(model_path)
     
