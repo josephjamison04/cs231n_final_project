@@ -220,8 +220,7 @@ def train(args):
                 x = x["pixel_values"]
                 
             model.train()  # put model to training mode
-            if args.option =='fc':
-                x = x.reshape(-1,128*128*3)
+
             x = x.to(device=device, dtype=dtype)  # move to device, e.g. GPU
             y = y.to(device=device, dtype=torch.long)
         # print(x.size())
