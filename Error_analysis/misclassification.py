@@ -90,7 +90,8 @@ def load_model(args):
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, num_classes)
     elif args.option == "SwinTransformer":
-        model_path = '../SwinTransformer/swin-from_pretrain-5epochs-lr_1e-05-l2_0.0.pt'
+        # model_path = '../SwinTransformer/swin-from_pretrain-5epochs-lr_1e-05-l2_0.0.pt'
+        model_path = '../SwinTransformer/swin-12-1e-05-cs231n.pt'
         model = Swinv2ForImageClassification.from_pretrained("microsoft/swinv2-tiny-patch4-window8-256")
     elif args.option == "ViT":
         model_path = "../fc_conv_transformer/vit_b16-from_pretrain-5epochs-lr_3e-05-l2_1e-08.pt"

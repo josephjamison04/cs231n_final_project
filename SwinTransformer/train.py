@@ -117,6 +117,20 @@ class Flatten(nn.Module):
     def forward(self, x):
         return flatten(x)
 
+def load_model(args):
+    device = torch.device("cuda") if args.use_gpu else torch.device("cpu")
+
+    model_path = 'swin-10-1e-05-cs231n.pt'
+    model = Swinv2ForImageClassification.from_pretrained("microsoft/swinv2-tiny-patch4-window8-256")
+    
+    saved_contents = torch.load(model_path)
+    
+    model = model.to(device)
+    print("Loaded model")
+    
+    model.load_state_dict(saved_contents["model"])
+    # model.eval()
+    return model
 
 
 def train(args):
@@ -180,11 +194,13 @@ def train(args):
         elif args.from_pretrain:
             image_processor = ViTImageProcessor(do_resize=True, size={"height" : 256, "width" : 256}, do_normalize=False)
             model = Swinv2ForImageClassification.from_pretrained("microsoft/swinv2-tiny-patch4-window8-256")
+        elif args.from_filepath:
+            image_processor = ViTImageProcessor(do_resize=True, size={"height" : 256, "width" : 256}, do_normalize=False)
+            model = load_model(args)
         else:
             # Initialize with random weights
-            model = Swinv2ForImageClassification(configuration) 
+            model = Swinv2ForImageClassification(configuration)
     
-
     ####################################################################################################
     ####################################################################################################
     ####################################################################################################
@@ -215,7 +231,7 @@ def train(args):
         for batch in tqdm(loader_train):
             x ,y = batch
             
-            if args.from_pretrain:
+            if args.from_pretrain or args.from_filepath:
                 x = image_processor(x, return_tensors="pt")
                 x = x["pixel_values"]
                 
@@ -242,7 +258,7 @@ def train(args):
             optimizer.step()
         lr_scheduler.step()
         
-        if args.from_pretrain:
+        if args.from_pretrain or args.from_filepath:
             t1_train_num_correct,train_num_samples, t5_train_num_correct =check_accuracy(loader_train,model, image_processor=image_processor)
             t1_val_num_correct,val_num_samples, t5_val_num_correct =check_accuracy(loader_val, model, image_processor=image_processor)
         else:
@@ -298,14 +314,12 @@ def check_accuracy(loader, model, image_processor=None):
         for batch in tqdm(loader):
             x,y =batch
             
-            if args.from_pretrain:
+            if args.from_pretrain or args.from_filepath:
                 # x = image_processor([i for i in x], return_tensors="pt")
                 x = image_processor(x, return_tensors="pt")
                 # print(x["pixel_values"].shape)
                 x = x["pixel_values"]
             
-            if args.option =='fc':
-                x = x.reshape(-1,3*128*128)
             x = x.to(device=device, dtype=dtype)  # move to device, e.g. GPU
             y = y.to(device=device, dtype=torch.long)
             scores = model(x)[0]
@@ -339,6 +353,7 @@ def get_args():
     parser.add_argument("--small_data", action="store_true") 
     parser.add_argument("--norm", action="store_true")
     parser.add_argument("--from_pretrain", action="store_true") 
+    parser.add_argument("--from_filepath", action="store_true") 
     
 
     # hyper parameters
