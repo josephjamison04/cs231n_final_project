@@ -104,9 +104,15 @@ Training Time ~70 minutes
 lr: 0.0001 	 batchsize: 64 	 epochs: 10 	 option: convNext
 drop_path_rate: 0.0 	 patch size: 4 	 num_stages: 4  weight decay(L2 reg): 0.001
 
+Epoch: 2 
+Top-1 Training ACC: 78.721875 
+Top-5 Training ACC: 95.7109375 
+Top-1 Val ACC: 58.06249999999999 
+Top-5 Val ACC: 86.20625 
+Training Loss: 0.015789873898029327 
 
 
-```python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 10 --option convNext --norm```
+```python train.py --use_gpu --batch_size 64 --lr 1e-4 --epochs 10 --option convNext --from_pretrain --norm```
 
 
 ---
