@@ -146,8 +146,8 @@ def train(args):
         train_dataset = TensorDataset_transform((X_train, y_train), transform=normalize)
         val_dataset = TensorDataset_transform((X_valid, y_valid), transform=normalize)
         
-        train_dataset = TensorDataset(X_train, y_train)
-        val_dataset = TensorDataset(X_valid, y_valid)
+        # train_dataset = TensorDataset(X_train, y_train)
+        # val_dataset = TensorDataset(X_valid, y_valid)
     else:
         train_dataset = TensorDataset(X_train, y_train)
         val_dataset = TensorDataset(X_valid, y_valid)
