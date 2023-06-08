@@ -453,61 +453,65 @@ if __name__ == "__main__":
     
     seed_everything(args.seed)
     
-    ####################################################################################
-    # Hyperparameter grid search
+    # ####################################################################################
+    # # Hyperparameter grid search
 
-    lrs = [3e-5, 3e-4]
-    drop_path_rate = [0.0] # Drop rate for stochastic depth (i.e., randomly drops 
-                                # entire Resblocks during training -> additional regularization)
-    weight_decay_factors = [1e-8]
+    # lrs = [3e-5, 3e-4]
+    # drop_path_rate = [0.0] # Drop rate for stochastic depth (i.e., randomly drops 
+    #                             # entire Resblocks during training -> additional regularization)
+    # weight_decay_factors = [1e-8]
     
-    hpo_loops = len(lrs)*len(drop_path_rate)*len(weight_decay_factors)
+    # hpo_loops = len(lrs)*len(drop_path_rate)*len(weight_decay_factors)
 
-    print(f"HPO loop will train {hpo_loops} models for {args.epochs} epochs each.")
-    print(f"Logs will be stored in SwinTransformers/logs folder")
-    print('-'*100)
-    ####################################################################################
+    # print(f"HPO loop will train {hpo_loops} models for {args.epochs} epochs each.")
+    # print(f"Logs will be stored in SwinTransformers/logs folder")
+    # print('-'*100)
+    # ####################################################################################
 
-    hpo_loop_counter = 1
-    best_t1_val_acc = -1.0
-    for lr in lrs:
-        for dpr in drop_path_rate:
-            for wd in weight_decay_factors:
-                now = datetime.datetime.now()
+    # hpo_loop_counter = 1
+    # best_t1_val_acc = -1.0
+    # for lr in lrs:
+    #     for dpr in drop_path_rate:
+    #         for wd in weight_decay_factors:
+    #             now = datetime.datetime.now()
 
-                args.lr = lr
-                args.dpr = dpr
-                args.patch_size = 16
-                args.weight_decay = wd
+    #             args.lr = lr
+    #             args.dpr = dpr
+    #             args.patch_size = 16
+    #             args.weight_decay = wd
                     
 
-                print(f"Now training model number {hpo_loop_counter} of {hpo_loops}...")
-                if args.from_pretrain:
-                    args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-l2_{args.weight_decay}.pt"  # save path
-                    args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-l2_{args.weight_decay}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
-                else:
-                    args.filepath = f"{args.option}-{args.epochs}epochs-lr_{args.lr}-dpr_{args.dpr}.pt"  # save path
-                    args.logpath = f"logs/{args.option}-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
+    #             print(f"Now training model number {hpo_loop_counter} of {hpo_loops}...")
+    #             if args.from_pretrain:
+    #                 args.filepath = f"{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-l2_{args.weight_decay}.pt"  # save path
+    #                 args.logpath = f"logs/{args.option}-from_pretrain-{args.epochs}epochs-lr_{args.lr}-l2_{args.weight_decay}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
+    #             else:
+    #                 args.filepath = f"{args.option}-{args.epochs}epochs-lr_{args.lr}-dpr_{args.dpr}.pt"  # save path
+    #                 args.logpath = f"logs/{args.option}-{args.epochs}epochs-lr_{args.lr}_-dpr_{args.dpr}-{now.hour}_{now.minute}_{now.second}.txt"  # save path
 
-                t1_val_acc = train(args)
-                hpo_loop_counter += 1
+    #             t1_val_acc = train(args)
+    #             hpo_loop_counter += 1
 
-                if t1_val_acc > best_t1_val_acc:
-                    best_model_path = args.filepath
-                    best_model_log = args.logpath
-                    best_t1_val_acc = t1_val_acc
+    #             if t1_val_acc > best_t1_val_acc:
+    #                 best_model_path = args.filepath
+    #                 best_model_log = args.logpath
+    #                 best_t1_val_acc = t1_val_acc
                 
-    # Write results file
-    now2 = datetime.datetime.now()
-    result_path = f"logs/RESULT_FILE-{now2.month}m_{now2.day}d_{now2.hour}h_{now2.minute}m.txt"
-    with open(result_path, "a+") as f:
+    # # Write results file
+    # now2 = datetime.datetime.now()
+    # result_path = f"logs/RESULT_FILE-{now2.month}m_{now2.day}d_{now2.hour}h_{now2.minute}m.txt"
+    # with open(result_path, "a+") as f:
         
-        f.write(f"Best top-1 validation accuracy out of {hpo_loops} models was {100* best_t1_val_acc}. \
-                \nThis occurred in model {best_model_path}, \nwhich was logged in {best_model_log}")
-    # args = get_args()
-    # args.filepath = f"{args.option}-{args.epochs}-{args.lr}-cs231n.pt"  # save path
-    # now = datetime.datetime.now()
-    # args.logpath = f"logs/{args.option}-{args.epochs}-{args.lr}_{now.hour}_{now.minute}_{now.second}.txt"  # save path
-    # seed_everything(args.seed)
-    # train(args)
+    #     f.write(f"Best top-1 validation accuracy out of {hpo_loops} models was {100* best_t1_val_acc}. \
+    #             \nThis occurred in model {best_model_path}, \nwhich was logged in {best_model_log}")
+    
+    args = get_args()
+    args.dpr = 0
+    args.patch_size = 0
+    args.weight_decay = 0
+    args.filepath = f"{args.option}-{args.epochs}-{args.lr}-cs231n.pt"  # save path
+    now = datetime.datetime.now()
+    args.logpath = f"logs/{args.option}-{args.epochs}-{args.lr}_{now.hour}_{now.minute}_{now.second}.txt"  # save path
+    seed_everything(args.seed)
+    train(args)
     

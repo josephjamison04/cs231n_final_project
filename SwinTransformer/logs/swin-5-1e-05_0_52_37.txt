@@ -1,0 +1,4 @@
+lr: 1e-05 	 batchsize: 32 	 epochs: 5 	 option: swin
+	drop_path_rate: 0 	 patch size: 4 
+weight decay(L2 reg): 0
+----------------- 
